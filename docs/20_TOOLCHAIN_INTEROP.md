@@ -1,52 +1,26 @@
-# 20 — Interop locale de la toolchain
+# 20 — Local toolchain interoperability
 
-## But
-
-Un Local Kristal doit pouvoir être inspecté par plusieurs outils sans que chaque outil invente une autre convention de chemins ou une autre définition de la surface GitHub.
-
-## Contrat d'inspection
-
-Le Local Kit 3.2.4 expose :
+Local Kit produces two machine-readable read-only contracts:
 
 ```bash
-python tools/kristal.py inspect <workspace>
-python tools/kristal.py read-surface <workspace> --require-ready
+python tools/kristal.py inspect <workspace> --compact
+python tools/kristal.py read-surface <workspace> --compact --require-ready
 ```
 
-`inspect` reste `kristal.local-inspection/1.0`, read-only et non sémantique. Il expose maintenant `github_read_surface` et `interop.suggested_collection_root`. `read-surface` émet directement `kristal.github-read-surface/1.0` pour éviter que Manager reconstruise lui-même la liste des fichiers.
+- `inspect` remains `kristal.local-inspection/1.0`, a local status and file-location discovery aid.
+- `read-surface` remains `kristal.github-read-surface/1.0`, the **exact, verified** list of reader files, file roles, media types, byte counts and SHA-256 values. `surface_digest` is an operational fingerprint, never a semantic commitment.
 
-## Ordre de découverte d'un State Snapshot v9
+## State discovery precedence
 
-1. `state/state-snapshot.json` — export courant explicite ;
-2. `build/v9/state-snapshot.json` — dernier build local ;
-3. `.kristal/v9/...` et `state-snapshot.json` racine — compatibilité legacy ;
-4. `release/v9/states/**/state-snapshot.json` — releases locales immuables.
+1. `state/state-snapshot.json` (explicit export).
+2. `build/v9/state-snapshot.json` (latest local build).
+3. `.kristal/v9/` and legacy root State Snapshot (compatibility).
+4. `release/v9/states/**/state-snapshot.json` (immutable local releases).
 
-La sélection d'un chemin ne change jamais `state_ref`, Logical Commitment ou State Commitment.
+This precedence is operational. Selecting a path does not rewrite the state's Logical Commitment.
 
-## Surface GitHub de lecture
+## Projection rules
 
-La projection recommandée est :
+`read-surface` includes approved reader files such as `AI_START_HERE.md`, `AI_MANIFEST.json`, indexed `canon/`, `sources/`, `docs/`, projection descriptions, materialization manifests and the exact `state/state-snapshot.json`. It does **not** mirror `tools/`, `build/`, `release/`, `hosting/`, `validation/` or `runtime/`. It refuses path traversal and checks actual byte length and digest against indexed metadata. Physical blob candidates are listed separately in `materialization_objects` so the host can select Git, Release, LFS, GHCR or a resolver without automatically copying huge objects.
 
-```text
-kristals/<slug>/
-  AI_START_HERE.md
-  AI_MANIFEST.json
-  ai/*
-  canon/*
-  sources/*
-  docs/*
-  state/state-snapshot.json
-  materializations/...   # descriptors/manifests; les blobs sont des candidats de transport séparés
-```
-
-Ce n'est ni un miroir complet du workspace, ni une publication immuable. Manager peut synchroniser exactement cette liste et son `surface_digest`, sans copier `tools/`, `build/`, `release/`, `hosting/`, `validation/` ou `runtime/`. Les bytes de matérialisation apparaissent séparément dans `materialization_objects` afin que la couche hosting choisisse Git, Release, GHCR, LFS ou un resolver adapté au lieu de pousser aveuglément de gros blobs dans l'arbre Git.
-
-## Frontières
-
-- **Kristal Manager** : inventaire, validation et synchronisation GitHub de la read surface ;
-- **Kristal GitHub Setup / Bootstrap** : qualification, publication immuable et activation ;
-- **Kompiler** : lecture/query/context optionnel ;
-- **Local Kit** : structure, validation locale, build v9, read model IA et contrat de projection.
-
-La visibilité `public/private` reste une décision opérationnelle et ne fait pas partie du canon sémantique.
+The Manager must consume this producer contract rather than reconstructing an index from directory traversal; a public upload must also pass C1/C2 authorization before the first network write.

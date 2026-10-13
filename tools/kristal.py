@@ -24,7 +24,7 @@ import tempfile
 import time
 import zipfile
 
-KIT_VERSION = "3.2.4"
+KIT_VERSION = "3.2.5-rc.1"
 FORMAT = "kristal.local-workspace/3.2.0"
 V31_FORMAT = "kristal.authoring-workspace/3.1.0"
 V3_FORMAT = "kristal.authoring-workspace/3.0.0"
@@ -59,58 +59,220 @@ REFERENCE_MATERIALIZATION_PROFILES = {
     "kristal.materialization/kristal-state-v6/1",
 }
 
-DOC_TEMPLATES = {
-    "00_INTENT_AND_SCOPE.md": """# Intention et scope\n\n## Pourquoi ce Kristal existe\n\nTODO\n\n## Corpus / problème de départ\n\nTODO\n\n## Résultats attendus\n\nTODO\n""",
-    "01_SEMANTIC_BOUNDARY.md": """# Frontière sémantique\n\n## Subject / territoire\n\nTODO\n\n## Possède\n\nTODO\n\n## Ne possède pas\n\nTODO\n\n## Relations avec d'autres Kristals\n\nTODO\n\n## State identity v9\n\nLe `state_ref` est défini dans `kristal.workspace.json`. Une référence externe doit être pinée à un Logical Commitment avant publication.\n""",
-    "02_NATIVE_MODEL.md": """# Modèle natif\n\n## Primitives du domaine\n\nTODO\n\n## Relations / transformations\n\nTODO\n\n## Dimensions internes\n\nTODO\n\n## Forme native retenue\n\n`undecided`\n\n## Logical Contracts v9\n\nTODO — définir les contrats logiques des artefacts canoniques sans forcer une forme universelle.\n\n## Pourquoi cette forme ne perd pas d'information essentielle\n\nTODO\n\n## Alternatives rejetées\n\nTODO\n""",
-    "03_EPISTEMIC_MODEL.md": """# Modèle épistémique\n\n## Régimes d'information\n\nTODO\n\n## Provenance épistémique\n\nTODO\n\n## Autorité\n\nTODO\n\n## Incertitude / conflits / inconnus\n\nTODO\n\n## Provenance de build\n\nTODO — séparer la derivation informatique de la provenance épistémique.\n\n## Politique des sorties IA\n\nLes sorties IA sont des propositions jusqu'à validation explicite.\n""",
-    "04_CANONICAL_DERIVED.md": """# Canonique et dérivé\n\n## Source(s) de vérité\n\nTODO\n\n## Logical Artifacts canoniques\n\nTODO — les enregistrer dans `canon/state.index.json`.\n\n## Artefacts dérivés / Runtime\n\nTODO\n\n## Materializations\n\nTODO — préciser ce qui est seulement représentation physique.\n\n## Recettes de reconstruction\n\nTODO\n""",
-    "05_ORIENTATIONS.md": """# Orientations et Surfaces\n\n## Orientations utiles\n\nTODO\n\n## Dimensions qui ne sont PAS des Orientation Axes\n\nTODO\n\n## Projections à matérialiser\n\nTODO\n\nUne projection v6/v7 reste une projection d'interopérabilité ; elle ne remplace pas automatiquement le Logical Artifact v9 natif.\n""",
-    "06_VALIDATION.md": """# Validation du domaine et lifecycle v10\n\n## Invariants structurels\n\nTODO\n\n## Invariants épistémiques\n\nTODO\n\n## Tests de reconstruction\n\nTODO\n\n## Logical Commitments\n\nTODO — préciser les profils et golden cases propres au domaine si nécessaire.\n\n## Critères de publication\n\nTODO\n\nFlux recommandé : `check` → `build-v9`. Pour inventaire/validation/synchronisation GitHub utiliser Kristal Manager. Pour qualification/publication/activation réseau utiliser Kristal GitHub Setup (Bootstrap). Les commandes `github-*` de ce kit restent des compatibilités avancées.\n""",
-    "07_HOSTING_AND_PUBLICATION.md": """# Hosting et publication v10
+DOC_TEMPLATES = {'00_INTENT_AND_SCOPE.md': '# Intent and scope\n'
+                           '\n'
+                           '## Why this Kristal exists\n'
+                           '\n'
+                           'TODO\n'
+                           '\n'
+                           '## Starting corpus and problem\n'
+                           '\n'
+                           'TODO\n'
+                           '\n'
+                           '## Expected outcomes\n'
+                           '\n'
+                           'TODO\n',
+ '01_SEMANTIC_BOUNDARY.md': '# Semantic boundary\n'
+                            '\n'
+                            '## Subject and territory\n'
+                            '\n'
+                            'TODO\n'
+                            '\n'
+                            '## Owned knowledge\n'
+                            '\n'
+                            'TODO\n'
+                            '\n'
+                            '## Excluded knowledge\n'
+                            '\n'
+                            'TODO\n'
+                            '\n'
+                            '## Relationships to other Kristals\n'
+                            '\n'
+                            'TODO\n'
+                            '\n'
+                            '## V9 state identity\n'
+                            '\n'
+                            'The `state_ref` is declared in `kristal.workspace.json`. Pin '
+                            'external semantic references to exact Logical Commitments before '
+                            'relying on them for a qualified publication.\n',
+ '02_NATIVE_MODEL.md': '# Native model\n'
+                       '\n'
+                       '## Domain primitives\n'
+                       '\n'
+                       'TODO\n'
+                       '\n'
+                       '## Relations and transformations\n'
+                       '\n'
+                       'TODO\n'
+                       '\n'
+                       '## Internal dimensions\n'
+                       '\n'
+                       'TODO\n'
+                       '\n'
+                       '## Chosen native shape\n'
+                       '\n'
+                       '`undecided`\n'
+                       '\n'
+                       '## V9 Logical Contracts\n'
+                       '\n'
+                       'TODO — define the domain Logical Contracts for admitted artifacts '
+                       'without forcing one universal topology.\n'
+                       '\n'
+                       '## Why the shape preserves the essential information\n'
+                       '\n'
+                       'TODO\n'
+                       '\n'
+                       '## Rejected alternatives\n'
+                       '\n'
+                       'TODO\n',
+ '03_EPISTEMIC_MODEL.md': '# Epistemic model\n'
+                          '\n'
+                          '## Information regimes\n'
+                          '\n'
+                          'TODO\n'
+                          '\n'
+                          '## Source and evidence provenance\n'
+                          '\n'
+                          'TODO\n'
+                          '\n'
+                          '## Authority\n'
+                          '\n'
+                          'TODO\n'
+                          '\n'
+                          '## Uncertainty, conflicts and unknowns\n'
+                          '\n'
+                          'TODO\n'
+                          '\n'
+                          '## Build provenance\n'
+                          '\n'
+                          'TODO — separate computational derivation from epistemic '
+                          'provenance.\n'
+                          '\n'
+                          '## AI output policy\n'
+                          '\n'
+                          'AI outputs remain proposals until explicitly validated and '
+                          'admitted.\n',
+ '04_CANONICAL_DERIVED.md': '# Canonical and derived content\n'
+                            '\n'
+                            '## Source(s) of truth\n'
+                            '\n'
+                            'TODO\n'
+                            '\n'
+                            '## Canonical Logical Artifacts\n'
+                            '\n'
+                            'TODO — register domain artifacts in `canon/state.index.json`.\n'
+                            '\n'
+                            '## Derived artifacts and runtime\n'
+                            '\n'
+                            'TODO\n'
+                            '\n'
+                            '## Materializations\n'
+                            '\n'
+                            'TODO — distinguish physical representation from semantic '
+                            'identity.\n'
+                            '\n'
+                            '## Reconstructability recipes\n'
+                            '\n'
+                            'TODO\n',
+ '05_ORIENTATIONS.md': '# Orientations and reader surfaces\n'
+                       '\n'
+                       '## Useful orientations\n'
+                       '\n'
+                       'TODO\n'
+                       '\n'
+                       '## Internal dimensions that are not orientation axes\n'
+                       '\n'
+                       'TODO\n'
+                       '\n'
+                       '## Projections to materialize\n'
+                       '\n'
+                       'TODO\n'
+                       '\n'
+                       'A v6/v7 interoperable projection remains a reader projection and does '
+                       'not automatically replace the native v9 Logical Artifact.\n',
+ '06_VALIDATION.md': '# Domain validation and v10 lifecycle\n'
+                     '\n'
+                     '## Structural invariants\n'
+                     '\n'
+                     'TODO\n'
+                     '\n'
+                     '## Epistemic invariants\n'
+                     '\n'
+                     'TODO\n'
+                     '\n'
+                     '## Reconstructability tests\n'
+                     '\n'
+                     'TODO\n'
+                     '\n'
+                     '## Logical Commitments\n'
+                     '\n'
+                     'TODO — identify domain-specific commitment profiles and golden fixtures '
+                     'when necessary.\n'
+                     '\n'
+                     '## Publication criteria\n'
+                     '\n'
+                     'TODO\n'
+                     '\n'
+                     'Suggested local path: `check` → `build-v9`. Use Manager for inventory '
+                     'and **authorized** read-surface synchronization. Use independent C1 '
+                     'qualification, owner C2 authorization and C3/Bootstrap controls for '
+                     'network publication.\n',
+ '07_HOSTING_AND_PUBLICATION.md': '# V10 hosting and publication\n'
+                                  '\n'
+                                  'The canon and logical commitments remain v9. Hosting is a '
+                                  'separate v10 operational layer.\n'
+                                  '\n'
+                                  '## Node and repository\n'
+                                  '\n'
+                                  'TODO — choose an authorized GitHub collection node. '
+                                  'Several independently owned Kristals may share a '
+                                  'repository only if permission boundaries are appropriate.\n'
+                                  '\n'
+                                  '## State path\n'
+                                  '\n'
+                                  'TODO — choose a stable repository-relative path, for '
+                                  'example `kristals/<slug>/state/state-snapshot.json`.\n'
+                                  '\n'
+                                  '## Qualification\n'
+                                  '\n'
+                                  'Independently qualify the exact revision and state being '
+                                  'considered for publication.\n'
+                                  '\n'
+                                  '## Disclosure and publication\n'
+                                  '\n'
+                                  'Public synchronization is disclosure before any immutable '
+                                  'release; it requires a separate authorized scope. '
+                                  'Publication produces a verifiable bundle and immutable '
+                                  'release without changing the v9 Logical Commitment.\n'
+                                  '\n'
+                                  '## Activation\n'
+                                  '\n'
+                                  'Activation is optional and separate. Publishing a release '
+                                  'does not automatically change the active channel.\n',
+ '08_GLOSSARY.md': '# Kristal glossary\n'
+                   '\n'
+                   'Define only domain-specific terminology whose meaning should not be left '
+                   'ambiguous.\n'
+                   '\n'
+                   '## Terms\n'
+                   '\n'
+                   'TODO — leave this section empty if no domain-specific glossary is '
+                   'needed.\n'}
 
-Le canon et les commitments restent v9. L'hébergement est une couche v10 séparée.
-
-## Node / repository
-
-TODO — choisir le nœud de collection GitHub qui publiera cet état. Un dépôt peut héberger plusieurs Kristals si les permissions et le lifecycle sont communs.
-
-## State path
-
-TODO — utiliser un chemin stable et relatif au repo, par exemple `kristals/<slug>/state/state-snapshot.json`.
-
-## Qualification
-
-La qualification doit viser le commit exact contenant l'état exporté.
-
-## Publication
-
-La publication v10 produit un bundle vérifiable et une Release immuable. Elle ne modifie pas le Logical Commitment v9.
-
-## Activation
-
-L'activation reste séparée et optionnelle. Une Release publiée n'est pas automatiquement l'état actif d'un channel.
-""",
-    "08_GLOSSARY.md": """# Glossaire du Kristal
-
-Définir ici uniquement les termes propres au domaine dont le sens ne doit pas être laissé à l'interprétation.
-
-## Termes
-
-TODO — laisser vide si aucun glossaire spécifique n'est requis.
-""",
-}
-
-PROFILE_NOTES = {
-    "open": "Aucune forme présupposée. Utiliser les Shape Probes avant de créer les schémas de domaine.",
-    "invariant": "Point de départ possible : invariant, morphes équivalents, conséquences, témoins/certificats, opérationnalisations.",
-    "procedural": "Point de départ possible : objets/états/opérations, ordre partiel, DAG ou hypergraphe. Ne pas forcer un DAG si les cycles sont sémantiques.",
-    "research": "Prévoir mémoire établie/importée, research graph, tentatives append-only, evidence et promotion explicite.",
-    "hierarchy-stub": "Autorise identité/scope/topologie avant contenu. Parent référence enfant sans copier son contenu.",
-    "executable": "Prévoir état, règles/transitions, observables, perturbations et sorties dérivées. Séparer structure et statistiques.",
-    "layered": "Prévoir plusieurs régimes/plans sémantiques et typer les passages entre mécanique, structure, interprétation et preuve.",
-}
-
+PROFILE_NOTES = {'open': 'No native shape is presumed. Apply the Shape Probes before introducing domain '
+         'schemas.',
+ 'invariant': 'Potential starting point: invariant, equivalent representations, consequences, '
+              'witnesses/certificates and operationalizations.',
+ 'procedural': 'Potential starting point: objects, states, operations, partial order, DAG or '
+               'hypergraph. Do not force a DAG if cycles are meaningful.',
+ 'research': 'Separate established/imported research, attempts, append-only observations, '
+             'provenance and explicitly promoted conclusions.',
+ 'hierarchy-stub': 'Allows identity, scope and topology without invented content. A parent '
+                   'references children without copying their canon.',
+ 'executable': 'Separate rules/transitions, observables, perturbations and derived output. '
+               'Simulation is not execution authorization.',
+ 'layered': 'Identify distinct layers and type the transitions between mechanics, structure, '
+            'interpretation and evidence.'}
 
 def read_json(path: Path):
     with path.open("r", encoding="utf-8") as f:
@@ -1342,6 +1504,8 @@ def _build_portable_ai(root: Path) -> dict:
     files = []
     for p in _portable_source_files(root):
         rel = p.relative_to(root).as_posix()
+        if _safe_indexed_read_path(root, rel) is None:
+            raise SystemExit(f"Unsafe portable source path: {rel}")
         entry = {
             "path": rel,
             "role": _portable_role(rel),
@@ -1533,6 +1697,37 @@ def cmd_build_ai(args):
     print("Reading requires no GitHub, network access, Python, Node, or Kristal tooling.")
 
 
+# Only these paths may be carried by the portable index into a hosted read surface.
+# This is an operational transport boundary, not a change to the v9 canon.
+_READ_SURFACE_INDEX_PREFIXES = (
+    "canon/", "sources/", "schemas/", "docs/", "projections/recipes/",
+    "projections/materialized/", "derived/indexes/", "derived/views/",
+    "derived/ai-contexts/", "materializations/v9/manifests/",
+    ".kristal/v9/materializations/",
+)
+
+
+def _safe_indexed_read_path(root: Path, rel: str) -> Path | None:
+    """Never read or publish paths outside the allowed workspace read model.
+
+    A SHA-256 in ai/INDEX.json does not authorize reading any arbitrary path.
+    This check also rejects symlink escapes even if a path looks relative.
+    """
+    if not isinstance(rel, str) or not rel or "\\" in rel or rel.startswith("/"):
+        return None
+    parts = rel.split("/")
+    if any(part in {"", ".", ".."} for part in parts):
+        return None
+    if rel != "state/state-snapshot.json" and not rel.startswith(_READ_SURFACE_INDEX_PREFIXES):
+        return None
+    candidate = (root / rel).resolve()
+    try:
+        candidate.relative_to(root.resolve())
+    except ValueError:
+        return None
+    return candidate
+
+
 def _check_portable_ai(root: Path) -> list[str]:
     errors = []
     manifest_path = root / "AI_MANIFEST.json"
@@ -1549,24 +1744,47 @@ def _check_portable_ai(root: Path) -> list[str]:
     for key, value in expected_reading.items():
         if reading.get(key) is not value:
             errors.append(f"portable_reading.{key} must be {value!r}")
-    required_paths = [
-        manifest.get("entrypoint"), manifest.get("state_snapshot"), manifest.get("index"),
-        manifest.get("context"), manifest.get("coverage"), manifest.get("glossary"),
-        manifest.get("relations"), manifest.get("questions"),
-    ]
-    for rel in required_paths:
-        if not isinstance(rel, str) or not (root / rel).is_file():
+    required_paths = {
+        "entrypoint": "AI_START_HERE.md", "state_snapshot": "state/state-snapshot.json",
+        "index": "ai/INDEX.json", "context": "ai/CONTEXT.md",
+        "coverage": "ai/COVERAGE.json", "glossary": "ai/GLOSSARY.md",
+        "relations": "ai/RELATIONS.json", "questions": "ai/QUESTIONS.md",
+    }
+    for key, rel in required_paths.items():
+        if manifest.get(key) != rel:
+            errors.append(f"Portable AI {key} must reference {rel}")
+        if not (root / rel).is_file():
             errors.append(f"Portable AI required file missing: {rel!r}")
-    index_path = root / str(manifest.get("index", ""))
+    index_path = root / "ai/INDEX.json"
     if index_path.is_file():
         try:
             index = read_json(index_path)
-            for item in index.get("files", []):
+            indexed_files = index.get("files", [])
+            if not isinstance(indexed_files, list):
+                errors.append("AI index files must be an array")
+                indexed_files = []
+            seen_paths = set()
+            for item in indexed_files:
+                if not isinstance(item, dict):
+                    errors.append("AI index file entry must be an object")
+                    continue
                 rel = item.get("path")
-                target = root / str(rel)
+                target = _safe_indexed_read_path(root, rel)
+                if target is None:
+                    errors.append(f"Unsafe AI index path: {rel!r}")
+                    continue
+                if rel in seen_paths:
+                    errors.append(f"Duplicate AI index path: {rel}")
+                    continue
+                seen_paths.add(rel)
                 if not target.is_file():
                     errors.append(f"AI index file missing: {rel}")
                     continue
+                expected_role = "state_snapshot" if rel == "state/state-snapshot.json" else _portable_role(rel)
+                if item.get("role") != expected_role:
+                    errors.append(f"AI index role mismatch: {rel}")
+                if item.get("size") != target.stat().st_size:
+                    errors.append(f"AI index size mismatch: {rel}")
                 if item.get("sha256") != "sha256:" + hash_file(target):
                     errors.append(f"AI index digest mismatch: {rel}")
         except Exception as exc:
@@ -1577,7 +1795,7 @@ def _check_portable_ai(root: Path) -> list[str]:
         errors.extend(mat_errors)
     except Exception as exc:
         errors.append(f"Unable to validate portable materializations: {exc}")
-    state_path = root / str(manifest.get("state_snapshot", ""))
+    state_path = root / "state/state-snapshot.json"
     if state_path.is_file():
         try:
             state = read_json(state_path)
@@ -1614,16 +1832,31 @@ def _github_read_surface(root: Path) -> dict:
     errors = _check_portable_ai(root) if (root / "AI_MANIFEST.json").is_file() else ["Portable AI read layer is missing; run build-ai first"]
     files: dict[str, dict] = {}
 
-    def add_file(rel: str, role: str, *, media_type: str | None = None, sha256: str | None = None, size: int | None = None):
-        p = root / rel
-        if not p.is_file():
+    def add_file(rel: str, role: str, *, media_type: str | None = None, sha256: str | None = None, size: int | None = None, trusted: bool = False):
+        # The index is descriptive metadata, never an authority to read a file
+        # outside the workspace or to alter its verified byte properties.
+        indexed = (root / rel).resolve() if trusted else _safe_indexed_read_path(root, rel)
+        try:
+            indexed.relative_to(root)
+        except (ValueError, TypeError, AttributeError):
+            errors.append(f"Unsafe read surface path: {rel!r}")
+            return
+        if indexed is None or not indexed.is_file():
+            return
+        actual_size = indexed.stat().st_size
+        actual_sha = "sha256:" + hash_file(indexed)
+        if size is not None and size != actual_size:
+            errors.append(f"Read surface size mismatch: {rel}")
+            return
+        if sha256 is not None and sha256 != actual_sha:
+            errors.append(f"Read surface digest mismatch: {rel}")
             return
         files[rel] = {
             "path": rel,
             "role": role,
-            "media_type": media_type or _media_type(p),
-            "size": p.stat().st_size if size is None else size,
-            "sha256": sha256 or ("sha256:" + hash_file(p)),
+            "media_type": media_type or _media_type(indexed),
+            "size": actual_size,
+            "sha256": actual_sha,
         }
 
     for rel, role in [
@@ -1638,7 +1871,7 @@ def _github_read_surface(root: Path) -> dict:
         ("ai/RELATIONS.json", "ai_relations"),
         ("ai/QUESTIONS.md", "ai_navigation"),
     ]:
-        add_file(rel, role)
+        add_file(rel, role, trusted=True)
 
     manifest = None
     index = None
@@ -1649,6 +1882,10 @@ def _github_read_surface(root: Path) -> dict:
             index = read_json(root / "ai/INDEX.json")
             for item in index.get("files", []):
                 if not isinstance(item, dict) or not isinstance(item.get("path"), str):
+                    errors.append("Invalid AI index file entry")
+                    continue
+                if _safe_indexed_read_path(root, item["path"]) is None:
+                    errors.append(f"Unsafe AI index path: {item['path']!r}")
                     continue
                 add_file(
                     item["path"], item.get("role") or "indexed_content",

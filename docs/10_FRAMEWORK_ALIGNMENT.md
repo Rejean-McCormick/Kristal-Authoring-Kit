@@ -1,12 +1,12 @@
-# 10 — Alignement Kristal v6/v7/v8/v9/v10
+# 10 — Kristal v6/v7/v8/v9/v10 alignment
 
-Ce kit est une couche d'auteur. Les specs/TCK du Framework restent normatifs. En v3, le kit distingue explicitement le plan sémantique v9 du plan hosted-network v10.
+The Authoring Kit is a **producer/authoring layer**, not the normative standard; Framework specifications and TCK remain authoritative. Its v9 semantic model and v10 hosting profile are deliberately distinct.
 
-## v6 — substrat portable
+## V6 — Portable epistemic substrate
 
-Le kit conserve référents, assertions atomiques quand elles sont utiles, valuations, applicabilité, provenance, conflits et projections portables.
+Referents, addressable assertions where appropriate, valuations, applicability, provenance, conflicts, and portable reader projections.
 
-## v7 — identité et orientations
+## V7 — Semantic identity and orientations
 
 ```text
 SEMANTIC IDENTITY != CONTENT IDENTITY
@@ -15,7 +15,7 @@ AXIS_TYPE != ORIENTATION_AXIS
 PROJECTION != SOURCE
 ```
 
-## v8 — langage, requête et contexte IA
+## V8 — Language, queries and AI contexts
 
 ```text
 READ MODEL != CANONICAL STATE
@@ -24,7 +24,7 @@ AI CONTEXT != CANONICAL STATE
 MODEL OUTPUT != AUTHORITY
 ```
 
-## v9 — Semantic State Architecture
+## V9 — Semantic State Architecture
 
 ```text
 LOGICAL STATE != PHYSICAL MATERIALIZATION
@@ -33,9 +33,9 @@ DOMAIN-NATIVE SHAPE != PORTABLE PROJECTION
 REFERENCE != OWNERSHIP TRANSFER
 ```
 
-`build-v9` construit toujours le State Snapshot et les Logical Commitments. Cette partie reste indépendante de GitHub.
+`build-v9` constructs the candidate State Snapshot and applicable Logical Commitments without requiring GitHub.
 
-## v10 — Hosted Kristal Network
+## V10 — Hosted Kristal Network
 
 ```text
 SEMANTIC STATE v9 != HOST BINDING v10
@@ -44,12 +44,12 @@ DIRECTORY != AUTHORITY
 QUALIFICATION != PUBLICATION != ACTIVATION
 ```
 
-Le Local Kit ne bootstrappe pas les comptes/repos GitHub. Il suppose que le nœud v10 existe déjà et utilise `hosting/github.json` pour relier un workspace à ce nœud.
+A host binding is not a qualified release and is not the identity of the semantic state. GitHub account setup belongs to Bootstrap and associated operators, not Local Kit.
 
-## Trois niveaux de preuve
+## Separate levels of evidence
 
-1. `check` / `build-v9` : cohérence de l'enveloppe locale et engagements locaux.
-2. `github-qualify` : preuve liée au commit exact du repo hôte.
-3. `github-publish` + vérification bundle : preuve de publication réseau.
+1. `check` / `build-v9`: local technical coherence and calculated commitments.
+2. Independently qualified **exact revision** via KristalDiag/C1 (not interchangeable with legacy CLI `github-qualify`).
+3. C2 owner authorization, Manager public/private sync checks, C3 collection integrity and release/activation controls.
 
-Ne jamais présenter un niveau comme preuve automatique du suivant.
+Never describe an earlier stage as automatically proving the next.

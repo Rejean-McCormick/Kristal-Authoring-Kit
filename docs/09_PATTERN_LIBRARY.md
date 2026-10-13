@@ -1,91 +1,39 @@
-# 09 — Bibliothèque de patterns ouverts
+# 09 — Open-ended knowledge pattern library
 
-Ces patterns sont des **stress tests**, pas des catégories fermées.
+The patterns below help discover a suitable native model. They are **not** an exhaustive normative taxonomy and they do not replace Arketype's separate design library.
 
-## 1. Invariant polymorphe
+## 1. Polymorphic invariant
 
-Inspiré d'un Kristal de primalité.
+Represent equivalent forms, invariants, certificates, proof obligations and counterexamples under a domain-defined logical contract.
 
-```text
-Invariant
-├─ formulations équivalentes
-├─ conséquences nécessaires/non suffisantes
-├─ témoins/certificats
-└─ algorithmes d'opérationnalisation
-```
+## 2. Layered interpretative plans
 
-Le danger : confondre définition, théorème dérivé et test.
+Preserve distinct mechanics, structural explanations, interpretations and evidence without flattening their relationships into one layer.
 
-## 2. Plans interprétatifs superposés
+## 3. Research memory
 
-Inspiré d'un Kristal où mécanique, structure, ontologie, épistémologie, résonance et histoire coexistent.
+Represent established results, previous work, hypotheses, attempts, negative outcomes and source trails with revision history.
 
-Le danger : transformer une transformation déterministe en preuve de l'interprétation suivante.
+## 4. Stub hierarchy
 
-## 3. Mémoire de recherche
+Allow a parent, course, subject or subsystem to own only an identity and scoped references before native domain content exists.
 
-```text
-KnowledgeGraph
-ResearchGraph
-StrategyGraph
-append-only attempts
-proof obligations
-promotion workflow
-```
+## 5. Executable diagnostic model
 
-Le danger : promouvoir automatiquement un résultat local ou faire d'une stratégie une vérité du domaine.
+Distinguish observed symptoms, possible causes, tests, state transitions and simulated actions from authorized interventions.
 
-## 4. Hiérarchie de stubs
+## 6. Native domain procedure
 
-```text
-University Kristal
-  → Track Kristals
-      → Course Kristals
-```
+Represent prerequisites, roles, branches, exceptional flow and dependency conditions without forcing a linear list when semantic cycles exist.
 
-Chaque parent possède la topologie, pas le contenu des enfants.
+## 7. Unknown new pattern
 
-Le danger : duplication sémantique et divergence.
+Use Shape Probes and an explicit domain contract before inventing additional canonical structure; avoid premature universalization.
 
-## 5. Modèle diagnostique exécutable
+## 8. Massive factored relationship
 
-```text
-identity/applicability
-+ multiplex topology
-+ operating state
-+ failure perturbations
-+ observability
-+ diagnostic case
-→ posterior / test plan
-```
+When an n-ary or huge relation must be compressed, preserve logical identity independently of dictionary/segment physical organization and lossless reconstructability.
 
-Le danger : laisser les fréquences statistiques réécrire la topologie structurale.
+## 9. Non-JSON native artifact
 
-## 6. Procédure métier native
-
-```text
-RecipeVariant → ProcedureGraph(DAG)
-```
-
-Les assertions restent une enveloppe transversale, mais le DAG porte la vérité procédurale.
-
-Le danger : aplatir le DAG en texte ou en triplets et perdre ordre partiel, parallélisme et états intermédiaires.
-
-## 7. Nouveau pattern inconnu
-
-Si aucun pattern ne convient : c'est acceptable.
-
-Documente la nouvelle forme dans `docs/02_NATIVE_MODEL.md`, crée les schémas nécessaires et explique pourquoi les patterns existants auraient perdu de l'information.
-
-
-## 8. Relation massive factorisée
-
-Une famille de centaines de milliers de claims peut partager prédicat, envelope épistémique ou dictionnaires dans sa matérialisation. Les claims restent logiquement distinguables.
-
-Le danger : prendre l'ordinal local ou le segment physique pour l'identité sémantique.
-
-## 9. Artifact natif non JSON
-
-Un AST, un format binaire formel ou un graphe natif peut utiliser un Logical Contract et un profil de commitment externe.
-
-Le danger : convertir le format en JSON uniquement parce que l'outil baseline sait hasher du JSON. Utiliser `precomputed` plutôt que perdre la forme native.
+A precomputed domain-native logical commitment is allowed under an explicit contract; the Kit does not require every artifact to be a JSON assertion list.

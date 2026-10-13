@@ -1,6 +1,6 @@
 # Kristal Authoring Kit (Local Kit)
 
-**Version:** `3.2.4` | **Local workspace:** `kristal.local-workspace/3.2.0` | **Semantic state:** `kristal.state/9.0` | **Optional hosting:** `kristal.hosting/10.0` | **Optional AI reader:** `kristal.portable-ai/1.0`
+**Version:** `3.2.5-rc.1` (compatibility candidate based on 3.2.4) | **Local workspace:** `kristal.local-workspace/3.2.0` | **Semantic state:** `kristal.state/9.0` | **Optional hosting:** `kristal.hosting/10.0` | **Optional AI reader:** `kristal.portable-ai/1.0`
 
 Kristal Authoring Kit creates, structures, checks, and builds portable local Kristals. It owns local authoring and semantic build operations; it does **not** grant public access, synchronize GitHub collections, or activate a hosted release.
 
@@ -65,7 +65,7 @@ The projection includes relevant state, canonical/provenance references and AI n
 
 ## GitHub synchronization and publication
 
-Manager synchronizes the Local Kit's exact validated read surface under `kristals/<slug>/` in a configured public or private GitHub collection. **Sync is not publication.** GitHub Setup / Bootstrap handles explicitly qualified publication and activation; the legacy advanced `configure-*`, `export-hosted`, `github-status`, `github-qualify` and `github-publish` commands remain separate from the recommended operator workflow.
+Manager synchronizes the Local Kit's exact validated read surface under `kristals/<slug>/` in a configured public or private GitHub collection. **Sync is distinct from immutable publication, but a push into a public GitHub repository already exposes the synced bytes. Public synchronization must pass the owner-authorized disclosure and independent qualification gates before network writes.** GitHub Setup / Bootstrap handles explicitly qualified publication and activation; the legacy advanced `configure-*`, `export-hosted`, `github-status`, `github-qualify` and `github-publish` commands remain separate from the recommended operator workflow.
 
 ## Local lifecycle and migration
 
@@ -91,3 +91,16 @@ The `kristal.local-inspection/1.0` result reports local state candidates and the
 ## Documentation
 
 Documentation chapters `01`–`13` cover local authoring and v9, `14`–`17` cover v10 hosting, and `18_PORTABLE_AI_CAPSULE.md`, `19_TOOLCHAIN_ROLES.md`, `20_TOOLCHAIN_INTEROP.md` and `21_V9_MATERIALIZATION_AUTHORING.md` cover optional AI readers, tool ownership, local interoperability and materialization preservation.
+
+
+## V10 interoperability hardening (3.2.5-rc.1 candidate)
+
+The read surface remains `kristal.github-read-surface/1.0`; its indexed file paths are constrained to the permitted workspace reader roots. The CLI now checks actual byte length **and** SHA-256 before marking a file ready, and rejects path traversal, symlink escapes, disallowed tooling paths and duplicated index paths. This does **not** authorize public sync.
+
+For a strictly read-only comparison between an untouched original and a separate upgraded workspace copy:
+
+```bash
+python scripts/audit_workspace_migration.py --before ../Original-Kristal --after ../Staging-Kristal
+```
+
+Results distinguish `PRESERVED`, `BLOCKED`, and `NOT_FULLY_QUALIFIED` (for example when no comparable state snapshots are available). The tool never performs a migration or modifies either workspace. See [V10 alignment](docs/22_V10_ALIGNMENT_READINESS.md) and [English migration guidance](docs/13_MIGRATION_V1_TO_V2.md).

@@ -1,25 +1,15 @@
-# 19 — Responsabilités de la toolchain
+# 19 — Toolchain responsibility boundaries
 
-## Kristal Local Kit
-Structure, sources, canon, validation locale et build v9.
+| Component | Role and authority |
+| --- | --- |
+| Framework v10 | Normative candidate schema, semantic commitments, host-profile contracts and TCK |
+| Local Authoring Kit | Initialize, check and build local v9 state, optional portable AI read surface |
+| KristalDiag / C1 | Independent qualification of the exact scoped state/revision |
+| GitHub Bootstrap / C2 | Network configuration, owner authorization and trust gates |
+| Kristal Manager | Operator inventory, exact read-surface verification and authorized GitHub synchronization |
+| C3 collection controller | Integrity of collection entries, sync manifests and publication candidate |
+| Arketype | Non-normative archetype templates and design guidance |
+| Konstellation | Read-only navigation across accessible Kristals and within a selected state |
+| Kompiler | Read-only retrieval and provenance-preserving context packs |
 
-## Kristal Manager
-Inventaire des Local Kristals et synchronisation GitHub de chaque dossier complet vers un repo GitHub individuel, public ou privé.
-
-## Kristal GitHub Bootstrap / Setup
-Le **Bootstrap** est le produit/moteur d'infrastructure. **Setup** est son interface `.pyw`. Il gère les nœuds/collections, qualification, publication et activation.
-
-## Kompiler
-Outil optionnel de lecture/query/context pack. Il ne possède aucun lifecycle canonique.
-
-## Médiathèque Kristal Sources
-Réservoir de sources en amont. Une source n'est pas automatiquement un artefact canonique; son adoption dans un Local Kristal passe par le modèle/provenance du Kristal.
-
-## Principe
-
-```text
-source → Local Kristal → synchronisation GitHub (Manager)
-                       → build v9 (Local Kit)
-                       → publish/activate (GitHub Setup)
-                       → read/query (Kompiler)
-```
+The authoritative file source is never moved to a convenient reader or controller merely because the reader can parse it. An index is not a canon; a GitHub URL is not a State Commitment; a passing test is not permission to publish.

@@ -1,18 +1,15 @@
-# 17 — Plusieurs Kristals par repo de collection
+# 17 — Multiple Kristals per hosting collection
 
-Créer un nouveau repo seulement lorsque changent les permissions, responsables, rétention, cycle de publication ou charge opérationnelle. Pour des milliers de Kristals partageant les mêmes contraintes, préférer une collection commune et des sous-arbres indépendants.
+One hosting repository can contain multiple independently owned Kristals. Each Kristal keeps its own `state_ref` and v9 State Commitment. A discovery index is a **derived operational projection**, not one big logical knowledge state.
 
-Chemin recommandé :
+Recommended structural distinction:
 
 ```text
-kristals/<slug>/
-  AI_START_HERE.md
-  AI_MANIFEST.json
-  ai/INDEX.json
-  state/state-snapshot.json
-  ...read surface...
+kristals/index.json                          # derived collection index, produced by Manager
+kristals/<slug>/AI_START_HERE.md             # approved reader entrypoint
+kristals/<slug>/ai/INDEX.json                # derived navigation
+kristals/<slug>/state/state-snapshot.json    # exact v9 state
+kristals/<slug>/.kristal/sync-manifest.json  # Manager-owned host inventory
 ```
 
-Chaque workspace conserve son propre `state_ref` et son propre Logical Commitment. Le Node v10 héberge plusieurs états sans fusionner leurs identités sémantiques.
-
-Le Local Kit ne définit pas le catalogue global de collection ; il fournit toutefois `read-surface` avec `target_root = kristals/<slug>` afin que Manager puisse maintenir efficacement un index dérivé de collection et batcher plusieurs mises à jour dans un seul commit/push.
+The Local Kit does not create `kristals/index.json` and should not infer access rights from the existence of this directory. The Manager-produced index and C3 checks must preserve per-state ownership, provenance and access policies. Two equal slugs or GitHub paths do not establish equivalent `state_ref` identities.

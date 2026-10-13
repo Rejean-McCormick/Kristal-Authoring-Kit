@@ -1,16 +1,19 @@
 # Local Kit schemas
 
-- `workspace.schema.json` — enveloppe locale v3.2 : v9 semantic state + portable-AI read layer + optional v10 hosted network.
-- `portable-ai-manifest.schema.json` — entrypoint machine-readable de la capsule offline `kristal.portable-ai/1.0`.
-- `ai-index.schema.json` — index déterministe des fichiers utiles à la lecture IA, avec rôles et SHA-256.
-- `ai-coverage.schema.json` — portée, ownership, références externes et limites explicites.
-- `state-index.schema.json` — registre v2 inchangé des Logical Artifacts/références canoniques.
-- `kristal-materialization-manifest.schema.json` — copie locale du contrat normatif v9 utilisé pour les matérialisations physiques.
-- `kristal-v9-capabilities.schema.json` — copie locale du descriptor de capabilities v9.
-- `source-catalog.schema.json` — sources du Local Kristal.
-- `projection-recipe.schema.json` — projections portables.
-- `github-hosting.schema.json` — liaison opérationnelle optionnelle d'un workspace vers un nœud GitHub v10.
+These schemas describe **authoring envelopes and derived readers**. They are not replacements for the normative Kristal Framework's v9/v10 schemas or domain Logical Contracts.
 
-Les schémas du Local Kit et de lecture IA ne remplacent pas les schémas normatifs du Kristal Framework. La couche `ai/` est dérivée et n'entre jamais dans le Logical Commitment v9.
+| Schema | Responsibility |
+| --- | --- |
+| `workspace.schema.json` | Local 3.2 envelope with v9 semantics, optional derived AI and v10 hosting target |
+| `state-index.schema.json` | Canonical v9 Logical Artifact and pinned reference index |
+| `source-catalog.schema.json` | Source provenance and local source catalog |
+| `projection-recipe.schema.json` | Noncanonical portable view recipes |
+| `portable-ai-manifest.schema.json` | `kristal.portable-ai/1.0` derived AI capsule |
+| `ai-index.schema.json` | Reader files with roles, sizes and SHA-256 digests |
+| `ai-coverage.schema.json` | Owned/external coverage and explicit limitations |
+| `github-read-surface.schema.json` | `kristal.github-read-surface/1.0` exact derived projection for Manager |
+| `github-hosting.schema.json` | Optional operational GitHub host binding |
+| `kristal-materialization-manifest.schema.json` | Local copy of the v9 Materialization Manifest schema |
+| `kristal-v9-capabilities.schema.json` | Local copy of v9 physical representation capabilities |
 
-- `github-read-surface.schema.json` — projection dérivée exacte à synchroniser sous `kristals/<slug>/` pour lecture GitHub/IA.
+**Important:** a read-surface file-list digest, a Git SHA and a transport Blob Digest are not a v9 Logical/State Commitment. `ai/` and collection indexes are derived. A valid schema or SHA-256 does not independently qualify domain truth or authorize public upload.

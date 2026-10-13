@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.2.5-rc.1 — V10 integration hardening candidate (English)
+
+- No workspace, State Index, Logical Artifact or v9 State Commitment contract changes.
+- Restrict GitHub read-surface index paths to safe workspace reader roots and verify indexed **size and SHA-256** before reporting readiness; reject duplicate/disallowed paths.
+- Add read-only `audit_workspace_migration.py` for comparing canon/state identity and available v9 commitments between independently staged workspaces.
+- Add eight regression tests for read-surface determinism, tampering, disabled-AI staleness, remote materialization availability and migration audits.
+- Update v10/Manager/C1/C2/C3 guidance in English, including the requirement for authorization before **public sync**.
+- Preserve the 3.2.4 tool baseline and example commitments; new candidate version must be independently accepted by consumers.
+
+
 ## 3.2.4 — GitHub AI read-surface alignment
 
 - aucun changement de `kristal.local-workspace/3.2.0`, des Logical Commitments ou du State Commitment ;

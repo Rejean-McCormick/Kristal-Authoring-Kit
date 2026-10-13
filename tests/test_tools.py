@@ -70,7 +70,7 @@ class ToolTests(unittest.TestCase):
         self.assertEqual(r.returncode, 0, r.stderr + r.stdout)
         obj = json.loads(r.stdout)
         self.assertEqual(obj["format"], "kristal.local-inspection/1.0")
-        self.assertEqual(obj["kit_version"], "3.2.4")
+        self.assertEqual(obj["kit_version"], kt.KIT_VERSION)
         self.assertEqual(obj["state"]["kind"], "build_v9")
         self.assertEqual(obj["state"]["path"], "build/v9/state-snapshot.json")
         self.assertEqual(obj["state"]["state_ref"], "urn:kristal:state:demo")

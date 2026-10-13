@@ -1,112 +1,55 @@
-# 03 — Découverte de la forme native
+# 03 — Discovering the native knowledge shape
 
-Le risque principal d'un agent est le **premature schema lock-in** : choisir un graphe, une ontologie ou une taxonomie avant d'avoir compris le phénomène.
-
-## Méthode : Shape Probes
-
-Passe les données à travers ces sondes. Plusieurs peuvent être vraies simultanément.
+A **Shape Probe** asks which structure captures the domain's actual semantics without inventing a universal type. Several probes can apply simultaneously.
 
 ### Probe A — Invariant
 
-Question : plusieurs formulations expriment-elles exactement la même propriété ?
+What remains unchanged across transformations? Identify equivalence classes, valid witnesses, exceptions and required proofs.
 
-Forme possible :
+### Probe B — Transformation / procedure
 
-```text
-INVARIANT
-├─ morphes équivalents
-├─ conséquences non équivalentes
-├─ contre-exemples
-├─ certificats / témoins
-└─ procédures d'opérationnalisation
-```
+Which operations change which objects, under which preconditions? Record partial orders, branching, loops and roles instead of forcing a linear flow.
 
-Ne confonds pas caractérisation, conséquence et méthode de décision.
+### Probe C — State / transition
 
-### Probe B — Transformation / procédure
+Are states, events, transition guards, observables or simulations first-class domain objects? Distinguish simulated states from observed outcomes.
 
-Question : les objets deviennent-ils d'autres états par opérations ?
+### Probe D — Multiplex or multi-network
 
-Forme possible : DAG, workflow, réseau de transformations, hyperarêtes n-aires.
+Can the same subjects have different kinds of links in separate layers? Preserve layer ownership and temporal validity.
 
-Préserve ordre partiel, parallélisme, consommation/production et états intermédiaires.
+### Probe E — Matrix or sparse space
 
-### Probe C — État / transition
+Which dimensional relations exist and what does a missing value mean? Absence is not automatically falsehood.
 
-Question : la connaissance dépend-elle de conditions, phases ou transitions ?
+### Probe F — Multiple scales
 
-Forme possible : automate, statechart, ledger d'événements.
+Does the knowledge relate nested or cross-scale representations? Avoid equating a summary with the complete lower-level structure.
 
-### Probe D — Multiplexe / multi-réseau
+### Probe G — Interpretation regimes
 
-Question : les mêmes entités sont-elles reliées par plusieurs couches indépendantes ?
+Can multiple readings of the same source coexist? Preserve original sources, interpretations and alternative hypotheses separately.
 
-Exemples : puissance + signal + réseau + mécanique ; social + financier + institutionnel.
+### Probe H — Research memory
 
-Ne fusionne pas les couches sous une relation générique qui perd leur sémantique.
+Are unsuccessful attempts, unresolved questions and conflicting evidence part of the intellectual record? Retain provenance and chronology.
 
-### Probe E — Matrice / espace sparse
+### Probe I — Identity-first stub
 
-Question : le domaine ressemble-t-il à un produit de dimensions dont seules certaines combinaisons existent ?
+Is a scoped placeholder appropriate before semantic content exists? Do not invent domain facts to complete the scaffold.
 
-Évite de matérialiser le produit cartésien complet. Stocke les cellules réellement porteuses d'information.
+### Probe J — Executable model
 
-### Probe F — Multi-échelle
+What can be simulated or verified? Keep model definition and execution/authority records distinct.
 
-Question : les mêmes phénomènes existent-ils à plusieurs échelles avec des relations entre niveaux ?
+### Probe K — Polychronous ledger
 
-Préserve les relations inter-échelles au lieu de dupliquer l'objet dans chaque niveau.
+Are multiple clocks, event dates, observations and revisions required? Keep chronology and causality separate.
 
-### Probe G — Régimes d'interprétation
+## Anti-reduction test
 
-Question : une chaîne de traitement passe-t-elle de données mécaniques vers interprétation, hypothèse, comparaison ou résonance ?
+If converting an object into a simple graph or assertion list loses important interactions, preserve the native structure and add references/projections only as needed.
 
-Chaque passage doit être explicitement typé. Une transformation déterministe peut être certaine alors que son interprétation reste spéculative.
+## Anti-overmodeling test
 
-### Probe H — Mémoire de recherche
-
-Question : faut-il conserver ce qui a été tenté, échoué, laissé ouvert ou promu ?
-
-Forme possible :
-
-```text
-KnowledgeGraph  = ce qui est établi/importé
-ResearchGraph   = obligations, hypothèses, essais, résultats
-StrategyGraph   = mémoire procédurale, non vérité du domaine
-```
-
-Les échecs peuvent être des données importantes sans devenir des faits sur le monde.
-
-### Probe I — Identity-first / stub
-
-Question : la frontière, le parentage ou l'ownership doit-il être réservé avant que le contenu existe ?
-
-Un Kristal peut commencer comme stub : identité stable + scope + children + statut `not_crystallized`.
-
-### Probe J — Exécutable
-
-Question : le modèle doit-il prédire, simuler, propager ou choisir une action ?
-
-Si oui, conserver les règles opérationnelles séparément de leurs projections statistiques.
-
-### Probe K — Polychronique / ledger
-
-Question : l'ordre des événements et la succession des versions sont-ils eux-mêmes des données ?
-
-Utiliser des événements append-only lorsque l'historique ne doit pas être écrasé.
-
-## Test anti-réduction
-
-Avant d'accepter un modèle, demande :
-
-> Si je convertis tout en cette structure, quelles distinctions du domaine deviennent impossibles à reconstruire ?
-
-Si la réponse contient quelque chose d'important, la structure est trop pauvre.
-
-## Test anti-surmodélisation
-
-À l'inverse :
-
-> Est-ce que cette classe/relation/dimension existe parce que le domaine l'exige, ou parce que mon template la proposait ?
-
-Supprimer ce qui n'est pas justifié.
+If a proposed abstraction creates more unverifiable commitments than it resolves, keep the structure simpler. A candidate pattern is not itself a new Framework Logical Contract.

@@ -1,227 +1,58 @@
-# 02 — Protocole de construction
+# 02 — Authoring and build protocol
 
-Ce protocole est destiné à un agent IA qui reçoit un corpus, des documents, une conversation ou un système à cristalliser.
+This is a **disciplined sequence for designing a domain Kristal**, not a set of automatically generated factual assertions.
 
-## Phase 0 — Ne rien modéliser prématurément
+## Phase 0 — Do not model prematurely
 
-Avant toute création de schéma :
+Record the actual problem, competing interpretations, available sources, uncertainty and what remains undecided. Avoid selecting a graph/tree/DAG just because it is convenient to render.
 
-- inventorier les fichiers et sources ;
-- relever les artefacts déjà canoniques ;
-- identifier les formats existants ;
-- noter les contradictions, trous, versions et autorités ;
-- détecter si un Kristal existe déjà sous forme de stub ou de version antérieure.
+## Phase 1 — Identity, boundary and ownership
 
-Livrable : `docs/00_INTENT_AND_SCOPE.md`.
+Define the subject, `state_ref`, owner, inclusion/exclusion boundary, related Kristals and lifecycle. A stub may legitimately own no canonical artifacts yet.
 
-## Phase 1 — Identité, frontière et ownership
+## Phase 2 — Discover the native shape
 
-Définir :
+Use [shape probes](03_SHAPE_DISCOVERY.md) to identify primitives, relations, causality, transitions, invariants, scales and domain-specific structure. Preserve information that a generic assertion model would lose.
 
-- `kristal_id` ou stratégie d'identité ;
-- titre et slug ;
-- Subject ou territoire sémantique ;
-- ce que le Kristal **possède** ;
-- ce qu'il **référence sans posséder** ;
-- parents/enfants/peers éventuels ;
-- état de lifecycle.
+## Phase 3 — Define epistemic regimes
 
-Question clé : **si deux équipes modifient deux Kristals différents, où doit vivre chaque vérité pour éviter les copies divergentes ?**
+Separate claims, observations, hypotheses, accepted findings, counterexamples, valuations, decisions and the evidence supporting each. Mark uncertainty explicitly.
 
-Livrable : `docs/01_SEMANTIC_BOUNDARY.md` + `kristal.workspace.json`.
+## Phase 4 — Define sources and authority
 
-## Phase 2 — Découvrir la forme native
+Record source identity, provenance, collection circumstances, version and authority. Source acquisition is not automatic acceptance as truth.
 
-Ne sélectionner aucune topologie par défaut.
+## Phase 5 — Canonical versus derived
 
-Extraire d'abord les primitives réelles :
+**Potentially canonical:** versioned native domain models, explicit assertions, Logical Artifacts, source-linked operational rules when a domain contract owns them.
 
-- identités ;
-- objets ;
-- états ;
-- événements ;
-- relations ;
-- transformations ;
-- dépendances ;
-- invariants ;
-- contraintes ;
-- preuves ;
-- mesures ;
-- décisions ;
-- actions ;
-- tentatives / échecs ;
-- temporalité ;
-- échelles ;
-- dimensions indépendantes.
+**Typically derived:** reader views, search indexes, comparisons, summaries, simulations, Context Packs, host sync indexes and cache files.
 
-Chercher ensuite la structure minimale qui préserve ces distinctions.
+## Phase 6 — Optional operational semantics
 
-Livrable : `docs/02_NATIVE_MODEL.md` et, si nécessaire, schémas dans `schemas/`.
+If a model has executable transitions or workflow rules, define authorized execution separately from the record of those rules. Tests of a model do not authorize real-world actions.
 
-## Phase 3 — Définir les régimes épistémiques
+## Phase 7 — Orientations and surfaces
 
-Pour chaque classe d'information, déterminer son statut :
-
-- observation ;
-- source externe ;
-- contrainte autoritative ;
-- connaissance de référence ;
-- interprétation ;
-- hypothèse ;
-- dérivation ;
-- résultat de calcul ;
-- preuve / certificat ;
-- décision ;
-- action ;
-- note de recherche ;
-- résonance/comparaison ;
-- inconnu / non applicable.
-
-Deux éléments qui se ressemblent mais n'ont pas le même régime ne doivent pas être fusionnés.
-
-Livrable : `docs/03_EPISTEMIC_MODEL.md`.
-
-## Phase 4 — Définir sources et autorité
-
-Pour chaque source :
-
-- identité ;
-- type ;
-- locator ;
-- version/date si connue ;
-- digest si possible ;
-- portée d'autorité ;
-- limitations ;
-- relation avec le Kristal.
-
-L'IA peut proposer une relation. Elle ne peut pas inventer l'autorité qui la rend vraie.
-
-Livrable : `sources/source-catalog.json`.
-
-## Phase 5 — Canonique vs dérivé
-
-Déclarer explicitement la source de vérité de chaque artefact.
-
-**Canonique possible :**
-
-- payload métier natif ;
-- référents ;
-- assertions ;
-- événements ou observations ;
-- règles validées ;
-- traces append-only qui doivent être conservées.
-
-**Dérivé typique :**
-
-- index ;
-- vues ;
-- résumés ;
-- embeddings ;
-- rankings ;
-- fingerprints ;
-- graphes de navigation ;
-- caches ;
-- semantic slices ;
-- AI context bundles.
-
-Règle : tout dérivé important doit avoir une recette de reconstruction ou un lineage.
-
-Livrable : `docs/04_CANONICAL_DERIVED.md` + `canon/state.index.json`.
-
-## Phase 6 — Sémantique opérationnelle optionnelle
-
-Si le domaine est exécutable, définir :
-
-- variables d'état ;
-- préconditions ;
-- transitions ;
-- effets ;
-- fonctions de calcul ;
-- règles de propagation ;
-- observables ;
-- validateurs ;
-- garanties et limites.
-
-Exemples : procédure culinaire, simulation de panne, calcul mathématique, workflow, moteur de règles.
-
-Ne réduis pas une sémantique exécutable à une description textuelle si l'exécution est un invariant important.
-
-Livrable : `canon/operations/` + documentation.
-
-## Phase 7 — Orientations et Surfaces
-
-Seulement maintenant, demander :
-
-- Quelle lecture principale est utile ?
-- Qu'est-ce qui change réellement la sélection ou l'organisation ?
-- Est-ce un Orientation Axis ou seulement une facette/coordonnée/filtre ?
-
-Une Surface :
-
-```text
-Subject + orientation + contexte → vue éphémère
-```
-
-Une Projection matérialisée :
-
-```text
-1 primary axis + 0/1 secondary axis
-```
-
-Si deux orientations sont chacune dominantes, créer deux Surfaces/projections plutôt qu'un artefact ambigu.
-
-Livrable : `docs/05_ORIENTATIONS.md` + `projections/recipes/*.projection.json`.
+Design reader questions and projections only after the native structure is stable. Record potential loss of detail and preserve semantic references to the source.
 
 ## Phase 8 — Population
 
-Importer ou créer le contenu par lots petits et auditables.
-
-À chaque lot :
-
-- conserver provenance ;
-- préserver IDs ;
-- ne pas supprimer les conflits ;
-- marquer les inconnues ;
-- enregistrer les transformations ;
-- tester les références.
-
-Une sortie IA non sourcée entre comme proposition/hypothèse/dérivé, pas comme autorité.
+Add traceable domain content with explicit status, version and provenance. A placeholder, `unknown`, or empty stub is better than fabricated evidence.
 
 ## Phase 9 — Validation
 
-Vérifier :
+Run structural and domain-specific tests; differentiate technical consistency from scientific, legal, and independent qualification.
 
-- cohérence structurelle ;
-- références non pendantes ;
-- invariants du domaine ;
-- séparation canonique/dérivé ;
-- provenance ;
-- ownership ;
-- applicabilité ;
-- dimensions de valuation ;
-- projections à 1+0/1 axes ;
-- reproductibilité des dérivés ;
-- état des lacunes.
+## Phase 10 — V9 crystallization and qualification
 
-Livrable : `validation/validation-report.json` et/ou rapports de domaine.
-
-## Phase 10 — Cristallisation v9 et qualification
-
-Après validation du domaine :
-
-1. enregistrer chaque Logical Artifact canonique dans `canon/state.index.json` ;
-2. pinner les références externes par Logical Commitment ;
-3. enregistrer/préserver les Materialization Manifests v9 existants lorsqu'ils représentent physiquement ces artifacts ;
-4. exécuter `check` afin de vérifier leur binding et les blobs locaux disponibles ;
-5. exécuter `build-v9` pour construire un candidat déterministe ;
-6. vérifier les Logical Commitments, le State Commitment et les capabilities de matérialisation annoncées ;
-7. générer les projections v6/v7 et index v8 nécessaires comme dérivés ;
-8. qualifier indépendamment avec KristalDiag lorsque disponible ;
-9. exécuter `publish-v9` pour produire un snapshot immuable ;
-10. n'utiliser `activate-v9` que si un channel opérationnel est réellement nécessaire.
-
-```text
-BUILD != PUBLISH != ACTIVATE
-```
-
-Ne pas créer automatiquement une Derivation fictive : si les entrées exactes et le transform ne sont pas connus, documenter la lacune au lieu d'inventer la provenance de build.
+1. Register each canonical Logical Artifact in `canon/state.index.json`.
+2. Pin external references to exact Logical Commitments.
+3. Register and preserve source-bound v9 Materialization Manifests where relevant.
+4. Run `check` to verify bindings and available local blob digests.
+5. Run `build-v9` to produce a deterministic candidate State Snapshot.
+6. Verify Logical Commitments, State Commitment and declared materialization capabilities.
+7. Build v6/v7 projections or v8 indexes as **derived** representations only when needed.
+8. Obtain independent qualification from KristalDiag/C1 for exact revisions when available.
+9. Keep `publish-v9` and `activate-v9` as a separate local lifecycle; v10 hosting needs separate C1/C2/C3 controls.
+10. Do not expose public bytes until owner authorization and applicable qualification have passed.

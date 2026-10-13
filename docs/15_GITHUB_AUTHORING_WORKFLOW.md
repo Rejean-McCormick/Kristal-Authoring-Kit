@@ -1,21 +1,23 @@
-# 15 — GitHub : synchronisation de lecture vs publication
+# 15 — GitHub read synchronization versus qualified publication
 
-## Deux opérations différentes
+Two distinct operations exist:
 
-**Sync de lecture** : projection dérivée et vérifiable d'un Local Kristal sous `kristals/<slug>/`, optimisée pour une IA recevant une URL GitHub. Gérée par **Kristal Manager** à partir du contrat `read-surface` du Local Kit.
+**Read-surface sync** projects a validated derived set of local files under `kristals/<slug>/`, produced **only** by Local Kit `read-surface` and orchestrated by Manager. It is neither a complete workspace mirror nor a semantic build.
 
-**Publication Kristal** : State Snapshot qualifié, bundle vérifié, Release immuable, activation éventuelle. Gérée par **Kristal GitHub Setup/Bootstrap**.
+**Immutable v10 publication** requires independently qualified State Snapshot/bundle evidence, controlled authorization, an exact verified repository revision and an explicit release/activation lifecycle owned by C1/C2/C3 and Bootstrap.
 
-La visibilité du repo et le digest de la read surface n'entrent jamais dans le Logical Commitment.
-
-## Chemin principal
+## Recommended gates
 
 ```text
-Local Kit: check → build-v9 → build-ai/read-surface
-Manager: Validate → Sync to GitHub
-GitHub Setup: qualify → publish → activate
+Local Kit: check → build-v9 → build-ai → check-ai → read-surface --require-ready
+Manager: inspect → validate exact manifest and state → verify owner authorization
+C1: qualify exact candidate revision independently
+C2: approve exact disclosure scope, collection, paths, operation, expiry
+Manager: authorized sync (public or private, checked before any write)
+C3: verify collection index and sync manifests → qualified publication workflow
+Activation: separate, explicit operator decision
 ```
 
-Le sync recommandé n'est ni un `state-only export`, ni un miroir complet du workspace. Il embarque l'entrypoint IA, les index/digests, le contenu lisible utile, l'état exact et les matérialisations locales explicitement référencées.
+**Important:** “sync is not publication” does *not* mean it is private. Sync into a **public repository** already discloses bytes. A public upload must be protected *before staging, commit and push*, with exact-revision qualification and owner authorization. A passing Local Kit `check` or `read-surface` can never replace those gates.
 
-Les commandes `export-hosted`, `github-status`, `github-qualify` et `github-publish` du CLI restent disponibles pour compatibilité/automatisation avancée.
+The Kit's `export-hosted`, `github-status`, `github-qualify` and `github-publish` commands remain **advanced legacy compatibility paths**, not the recommended owner workflow. Their presence is not authorization to use them.

@@ -1,17 +1,13 @@
-# AGENTS.md — Kristal Local Kit v3.2
+# Agent and contributor instructions — Kristal Local Kit
 
-Ce dépôt outille des **Local Kristals**.
+This repository is the **local authoring and semantic-build owner**, not the hosted publication authority. Follow the pinned Kristal Framework contracts; do not redefine Logical/State Commitments or reclassify derived AI/hosting files as canon.
 
-Principes :
+1. Preserve every v9 semantic identity and commitment unless an authorized domain change explicitly requires otherwise.
+2. Keep Local Kit `check`/`build-v9`/`build-ai`/`read-surface` separate from independent qualification, public GitHub synchronization, immutable publication and activation.
+3. `read-surface` is a verified **derived** file inventory for consumers such as Manager; it does not grant permission to upload any bytes.
+4. Materialization manifests must remain bound to their exact source Logical Commitments. Remote and missing blobs must never be fetched or asserted available implicitly.
+5. Never migrate the user's production workspace to test compatibility: compare independent copies using `scripts/audit_workspace_migration.py` and explicitly distinguish unknown evidence from passed checks.
+6. Manager owns the operator registry and authorized synchronization; Bootstrap/C1/C2/C3 own trust and release gates; Arketype owns noncanonical archetype design metadata; Kompiler/Konstellation consume read-only projections.
+7. Work in English for new code, docs, tests and reports. Preserve stable serialized identifiers and the old examples' historical metadata.
 
-1. préserver la sémantique v9 et les Logical Commitments ;
-2. ne jamais mélanger synchronisation GitHub, hosting, publication ou activation avec l'identité sémantique ;
-3. traiter `ai/` et Kompiler comme une couche de lecture optionnelle et dérivée ;
-4. utiliser Kristal Manager pour l'inventaire, la validation et la synchronisation GitHub public/privé de la read surface ;
-5. utiliser Kristal GitHub Setup/Bootstrap comme parcours principal de qualification/publication/activation réseau ;
-6. conserver les commandes `github-*` de ce kit uniquement comme compatibilité avancée ;
-7. ne pas rendre une sortie IA canonique sans validation explicite.
-
-Le build local normal est `check` → `build-v9`.
-
-Interop locale : utiliser `python tools/kristal.py inspect <workspace>` et `python tools/kristal.py read-surface <workspace>` pour une vue machine read-only ; ne jamais traiter cette sortie comme du canon sémantique.
+**Local validation:** `python scripts/check_repo.py`. The status of a passing local test is not evidence of remote GitHub qualification or factual truth.

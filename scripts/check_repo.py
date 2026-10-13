@@ -88,6 +88,9 @@ TEST_BATCHES = [
 for batch in TEST_BATCHES:
     run(sys.executable,'-m','unittest','-v',*batch)
 
+# Validate harmonization regressions without changing shipped workspaces.
+run(sys.executable, '-m', 'unittest', '-v', 'tests.test_v10_alignment')
+
 # Check shipped examples and rebuild the v9 example in a temp copy.
 run(sys.executable,str(CLI),'check',str(ROOT/'examples/demo-open'))
 run(sys.executable,str(CLI),'check',str(ROOT/'examples/demo-v9-small'))
@@ -116,4 +119,4 @@ with tempfile.TemporaryDirectory(prefix='kristal-authoring-hosted-ci-') as td:
     run(sys.executable,str(CLI),'build-ai',str(tmp))
     if not (tmp/'build/v9/state-snapshot.json').is_file():raise SystemExit('hosted demo did not produce v9 state')
     run(sys.executable,str(CLI),'check-ai',str(tmp))
-print('Kristal Local Kit 3.2.4 repository check: PASS')
+print(f'Kristal Local Kit {(ROOT / "VERSION").read_text().strip()} repository check: PASS')

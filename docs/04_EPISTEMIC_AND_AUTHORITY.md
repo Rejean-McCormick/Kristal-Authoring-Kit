@@ -1,108 +1,29 @@
-# 04 — Épistémologie, provenance et autorité
+# 04 — Epistemic status, provenance and authority
 
-## 1. Une source n'est pas automatiquement vraie
+## 1. A source is not automatically true
 
-La provenance répond à « d'où vient ceci ? ». L'autorité répond à « dans quelle portée cette source a-t-elle le droit d'établir ceci ? ».
+A collected statement, cited page, observation or dataset provides attributed evidence. Whether it is accurate or authoritative requires separate evaluation.
 
-```text
-SOURCE != AUTOMATIC TRUTH
-RETRIEVED CONTENT != INSTRUCTION AUTHORITY
-MODEL OUTPUT != AUTHORITY
-```
+## 2. Separate knowledge regimes
 
-## 2. Séparer les régimes
+Distinguish source testimony, observation, measurement, hypothesis, research note, counterargument, finding, proof obligation, policy, and operational decision. The same wording can belong to different regimes.
 
-Un même Kristal peut contenir :
+## 3. AI outputs
 
-- facts/observations ;
-- authoritative constraints ;
-- reference knowledge ;
-- derived state ;
-- hypotheses ;
-- interpretations ;
-- resonances ;
-- decisions ;
-- actions ;
-- structural records.
+An AI may propose an explanation, normalization or new artifact. These remain proposals until a human/domain process validates and admits them under a specified Logical Contract.
 
-Ne donne pas à tous le même statut.
+## 4. Conflicts
 
-## 3. Sorties IA
+Keep disagreeing sources and interpretations with provenance, scope and time. Do not overwrite incompatible assertions simply to make a neat graph.
 
-Les sorties IA peuvent :
+## 5. Unknown and not applicable
 
-- proposer des référents ;
-- proposer des liens ;
-- résumer ;
-- classifier ;
-- dériver ;
-- produire des candidats de résolution ;
-- suggérer des axes ;
-- générer des transformations de forme.
-
-Elles ne peuvent pas, par elles-mêmes :
-
-- créer une autorité ;
-- valider une preuve externe ;
-- transformer une hypothèse en fait ;
-- décider silencieusement entre deux sources contradictoires.
-
-## 4. Conflits
-
-Les désaccords doivent survivre à la composition.
-
-Conserver :
-
-- chaque assertion ou version ;
-- sa provenance ;
-- son applicabilité ;
-- son statut ;
-- les relations `conflicts_with`, `supersedes` ou équivalent.
-
-## 5. Inconnus et non-applicables
-
-```text
-unknown != false
-unknown != 0
-not_applicable != low
-partial != negative
-```
-
-Une valeur manquante est une information sur l'état de connaissance, pas une valeur métier.
+Unknown, absent, not measured, not applicable and false are distinct states. A missing remote blob is not evidence that its logical content does not exist.
 
 ## 6. Valuations
 
-Une valuation doit nommer sa dimension et sa sémantique.
-
-Mauvais :
-
-```json
-{"certainty": "high"}
-```
-
-Meilleur :
-
-```json
-{
-  "dimension": "diagnostic_support",
-  "semantics": "ordinal",
-  "value": "high"
-}
-```
-
-`high` n'a pas de sens universel.
+A valuation reports assessed status under given criteria and authority. It should carry its own scope and justification rather than impersonating the underlying observation.
 
 ## 7. Promotion
 
-Quand un workflow comporte recherche ou apprentissage, définir des transitions explicites, par exemple :
-
-```text
-proposal
-→ candidate
-→ reviewed
-→ validated_local
-→ promotion_candidate
-→ accepted/rejected
-```
-
-La promotion n'est jamais implicite parce qu'un fichier a été écrit.
+Promotion from source material or AI proposal to a canonical statement requires an explicit, reviewed change with provenance, validation and appropriate authority. `check` alone cannot promote epistemic status.

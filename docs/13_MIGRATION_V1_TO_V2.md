@@ -1,25 +1,19 @@
-# 13 — Migration des anciens workspaces vers v3
+# 13 — Workspace migration and compatibility audit
 
-La commande actuelle est :
+The established migration command is `python tools/kristal.py migrate-v10 PATH`. It accepts legacy local v1/v2 workspaces and handles v3/v3.1 envelope migration according to the existing implementation. It is **not** the proper first step on the owner's only copy.
+
+## Legacy envelopes
+
+- **v1 → v2:** adds `state_ref` and v9 target; converts the legacy State Index to structured Logical Artifact entries. Unresolved legacy contracts are explicitly marked with the placeholder `Local Kristal.legacy-json-artifact/1.0` and a migration note; no factual contract is inferred.
+- **v2/v3 → 3.2:** upgrades the workspace envelope to `kristal.local-workspace/3.2.0`, declares optional target `kristal.hosting/10.0`, and adds `hosting/` and `build/v10/` organization. The existing canonical index, canonical payload and v9 Logical/State Commitments are not meant to change.
+- **3.2.2/3.2.3 tools → candidate 3.2.5-rc.1:** the file tool and local layout are versioned independently. Do not replace embedded tools in the original 126 workspaces en masse. Stage a separate copy, record file digests, run check/inspect/build-v9, and compare independently.
+
+## Required migration gate
 
 ```bash
-python tools/kristal.py migrate-v10 PATH
+python scripts/audit_workspace_migration.py --before ../Original --after ../Staging
 ```
 
-Elle accepte les workspaces Local Kristal v1 et v2.
+The audit is **read-only**. It compares canonical file membership/bytes, `state_ref` and any available v9 State Snapshot commitments. An absent snapshot is `NOT_FULLY_QUALIFIED`, **not** evidence of equality. Any canonical drift or commitment difference is `BLOCKED` and needs a separate domain migration decision. Preserve the original workspace for rollback.
 
-## v1 → v2 sémantique
-
-Pour un ancien v1, le migrateur ajoute `state_ref`, target v9 et convertit le State Index vers des entrées Logical Artifact structurées. Les anciens chemins sans contrat reçoivent un placeholder explicite `Local Kristal.legacy-json-artifact/1.0` avec `migration_note`.
-
-## v2 → v3 hosted-network
-
-Le passage v2 → v3 :
-
-- change l'enveloppe en `kristal.local-workspace/3.2.0` ;
-- ajoute `target.hosted_network_baseline = kristal.hosting/10.0` ;
-- ajoute les politiques qualification-before-publication / exact-commit ;
-- ajoute `hosting/` et `build/v10/` ;
-- ne change pas `canon/state.index.json`, les payloads ni les commitments v9.
-
-Aucune cible GitHub n'est inventée pendant migration. Exécuter `configure-github` seulement avec un repo et un Framework SHA réellement choisis.
+No target GitHub repository, grant, host binding or publication is inferred during migration. Run `configure-github` only when the owner has deliberately chosen a real repository and a verified Framework commit SHA.

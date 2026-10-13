@@ -1,111 +1,29 @@
-# 21 — Authoring des matérialisations v9
+# 21 — V9 materialization authoring and partial availability
 
-## But
+Logical Artifacts and their Logical Commitments are independent of physical representation. The Authoring Kit preserves existing v9 Materialization Manifests instead of reducing them to the `inline-json/1` profile. Custom compressed, factored, segmented and dictionary-based profiles remain valid.
 
-Le Logical Artifact et son Logical Commitment restent indépendants de leur représentation physique. Le Local Kit 3.2.4 sait désormais **préserver et vérifier des Materialization Manifests v9 existants** au lieu de retomber systématiquement sur `inline-json/1`.
+## Discovery and registration
 
-Le kit ne choisit pas à la place du domaine un profil de factorisation. Les profils custom restent légitimes, par exemple :
-
-```text
-pokemon.materialization/factorized-zstd/1
-```
-
-## Emplacements découverts
-
-Le kit découvre automatiquement les manifests v9 sous :
-
-```text
-materializations/v9/manifests/**/*.json
-.kristal/v9/materializations/**/*.json   # layout legacy accepté
-```
-
-Seuls les documents ayant `artifact_type = kristal_materialization_manifest` sont traités comme manifests.
-
-## Enregistrement explicite
-
-Pour importer un manifest existant dans le layout d'authoring courant :
+Manifests are discovered under `materializations/v9/manifests/**/*.json` and the supported legacy `.kristal/v9/materializations/**/*.json`. Only `artifact_type=kristal_materialization_manifest` is treated as an authoring manifest.
 
 ```bash
-python tools/kristal.py register-materialization . \
-  --manifest path/to/materialization.json
+python tools/kristal.py register-materialization . --manifest path/to/materialization.json
+python tools/kristal.py check .
+python tools/kristal.py build-v9 .
 ```
 
-Le manifest est refusé si son `source.artifact_id`, son Logical Contract ou son Logical Commitment ne correspondent pas au Logical Artifact canonique courant.
+A registered manifest must bind to the **current** source `artifact_id`, Logical Contract and Logical Commitment. Checks enforce manifest envelope, segment keys and uniqueness, `reconstructability.lossless=true`, valid byte digests, and size/SHA-256 for any currently available safe workspace-local blob.
 
-## Validation
+## Remote / missing blobs
 
-`check` vérifie :
+`https://`, object-store and other non-workspace locators are **descriptors only**: the Kit does not fetch bytes or claim them available. A safe relative locator whose blob is missing is reported separately. Coverage and transport inventory distinguish `workspace_local`, `workspace_missing`, `external` and `unlocated`; a partial physical representation does not imply semantic absence.
 
-- enveloppe v9 du manifest ;
-- présence d'au moins un segment ;
-- `reconstructability.lossless=true` ;
-- binding exact au Logical Artifact canonique ;
-- unicité des `materialization_id` et `segment_key` ;
-- forme des Blob Digests et tailles ;
-- pour un `locator` local présent : taille et SHA-256 réels du blob.
-
-Un locator non local, ou un blob local actuellement absent, n'est pas téléchargé silencieusement. Le kit émet un avertissement : v9 autorise la disponibilité partielle et les resolvers externes.
-
-## Build
-
-`build-v9` :
-
-1. calcule les Logical Artifacts et le State Snapshot comme avant ;
-2. génère `inline-json/1` pour les artifacts JSON calculés localement ;
-3. copie également les manifests v9 existants validés dans `build/v9/materializations/` ;
-4. agrège les profils réellement présents dans `v9-capabilities.json` ;
-5. dérive `segmentation` depuis les manifests multi-segments ;
-6. dérive `factorization` depuis les dictionnaires, les extensions de capability explicites, ou un descriptor v9 existant qui couvre effectivement un profil découvert.
-
-Les manifests importés ne participent ni au Logical Commitment d'un artifact, ni au State Commitment.
-
-### Pas de duplication des gros blobs
-
-Le build **ne recopie pas automatiquement les blobs référencés** par un manifest existant. Il copie/normalise le descriptor dans `build/v9/materializations/` et conserve les locators physiques déclarés.
-
-Cette règle évite qu'un corpus de plusieurs centaines de Mo soit dupliqué à chaque `build-v9`. Une capsule d'échange autonome qui embarque les blobs est une opération de transport distincte et ne doit pas être confondue avec le build sémantique local.
+`build-v9` aggregates materialization capability profiles and preserves descriptor manifests in `build/v9/materializations/`; local blobs are not duplicated. AI `ai/INDEX.json` carries materialization **manifests** as reader files but lists blobs in separate `materialization_blobs` with size, digest, availability, transport class and locator. Managers/hosts decide transport explicitly and must not bulk-push large data into a Git tree.
 
 ```text
 MANIFEST PRESERVATION != BLOB DUPLICATION
+BLOB DIGEST != LOGICAL COMMITMENT
+PARTIAL AVAILABILITY != NEGATION
 ```
 
-## Capabilities héritées
-
-Pour les anciens Kristals, le kit peut lire comme **hint non sémantique** :
-
-```text
-.kristal/v9/capabilities.json
-```
-
-Les flags de matérialisation ne sont hérités que si ce descriptor mentionne au moins un profil réellement découvert dans les manifests courants. Cela permet de préserver proprement des profils custom existants sans les deviner à partir de leur nom.
-
-Pour un nouveau profil custom qui factorise sans dictionnaire et sans descriptor legacy, l'auteur peut déclarer le hint physique non sémantique :
-
-```json
-{
-  "extensions": {
-    "capabilities": {
-      "factorization": true,
-      "segmentation": true
-    }
-  }
-}
-```
-
-## Read model IA / GitHub
-
-`build-ai` indexe les Materialization Manifests découverts avec le rôle `materialization_manifest`. Les blobs référencés ne sont pas injectés automatiquement dans la liste de fichiers Git/portable : ils sont décrits dans `ai/INDEX.json.materialization_blobs` avec leur locator, disponibilité, taille, digest et `transport_class=materialization`. Pour un blob workspace-local, taille et SHA-256 réels sont aussi exposés.
-
-`ai/COVERAGE.json` expose séparément le nombre de manifests, de blobs locaux disponibles, de locators externes et de locators locaux actuellement absents. Une IA peut donc savoir si elle dispose des octets localement sans confondre disponibilité physique et identité logique.
-
-`read-surface` réutilise exactement cet index pour la projection GitHub. Les manifests restent dans `files`; les bytes apparaissent séparément dans `materialization_objects` pour que le hosting choisisse une technologie GitHub adaptée (arbre Git, Release, GHCR, LFS, etc.). Aucun fetch distant n'est effectué par le Local Kit.
-
-## Invariant
-
-```text
-REPACK / RESEGMENT / RECOMPRESS
-        !=
-LOGICAL CHANGE
-```
-
-Tant que la reconstruction définie par le profil reste lossless et que le Logical Commitment source est inchangé, la représentation physique peut évoluer indépendamment.
+A rebuild or change of host location may alter physical bytes/availability without altering v9 logical identity. Materialization schema files remain Framework-defined; no new logical contract was introduced in this candidate.

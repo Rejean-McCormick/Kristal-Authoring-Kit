@@ -1,28 +1,22 @@
-# 12 — Lifecycle local v9 et publication réseau v10
+# 12 — Local v9 lifecycle and hosted v10 publication
 
 ## Local / offline
 
 ```bash
-python tools/kristal.py check .
-python tools/kristal.py build-v9 .
-python tools/kristal.py publish-v9 .
-python tools/kristal.py activate-v9 . --channel current   # optionnel
+python tools/kristal.py check PATH
+python tools/kristal.py build-v9 PATH
+python tools/kristal.py publish-v9 PATH
+python tools/kristal.py activate-v9 PATH --channel current   # optional local channel
 ```
 
-`publish-v9` stocke un snapshot local sous `release/v9/states/...`. Ce mécanisme reste utile pour archives/tests hors réseau.
+A local build or release does not automatically authorize a hosted GitHub publication or any operational action.
 
-## Réseau v10
+## Hosted v10
 
-```bash
-python tools/kristal.py configure-github . ...
-python tools/kristal.py export-hosted . --repo-dir <checkout>
-# review / git add / commit / push
-python tools/kristal.py github-qualify .
-python tools/kristal.py github-publish . --framework-path <framework> --yes
-```
+The normal owner workflow is Framework-pinned build → read-surface (if appropriate) → Manager validation → C1 independent qualification → C2 exact owner grant → policy-approved synchronization → C3 collection verification → immutable release → optional activation. GitHub writes to public repositories are disclosures and must be reviewed **before** push/merge.
 
-La publication réseau exige un état distant byte-identique au build local, un receipt de qualification du commit exact, puis une Release v10 avec `state-snapshot.json`, `bundle-manifest.json` et `publication.json`.
+The Kit's `github-*` commands are advanced compatibility utilities, not proof of external qualification or a replacement for Bootstrap.
 
 ## Activation
 
-L'activation réseau n'est pas déclenchée automatiquement par le kit v3. La séparation BUILD / QUALIFY / PUBLISH / ACTIVATE est conservée.
+Activation is a distinct mutable channel transition. Do not activate by default when building, synchronizing or publishing, and do not alter v9 State Commitments to change host channels.
