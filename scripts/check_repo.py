@@ -88,6 +88,8 @@ TEST_BATCHES = [
 for batch in TEST_BATCHES:
     run(sys.executable,'-m','unittest','-v',*batch)
 
+run(sys.executable, '-m', 'unittest', '-v', 'tests.test_discovery', 'tests.test_discovery_interop', 'tests.test_cleanup_gui')
+
 # Validate harmonization regressions without changing shipped workspaces.
 run(sys.executable, '-m', 'unittest', '-v', 'tests.test_v10_alignment')
 

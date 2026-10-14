@@ -1,11 +1,11 @@
 {
   "format": "kristal.local-kit-repo-manifest/3.2.0",
   "algorithm": "sha256",
-  "kit_version": "3.2.5-rc.1",
+  "kit_version": "3.3.1",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "6ea08c5f53892897aa71c3d1164707002a7f824dc1f3ccb36bdace4b9d5e21bb",
+      "sha256": "7477432caa45ae0301ea46bb0699c74b67418862cfac0a0394027f25b76e1b66",
       "size": 869
     },
     {
@@ -20,8 +20,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "557a3b6e0c07a7a6715a1326a0b125770d20905140aa4ef025b7d2ddc9775a37",
-      "size": 8519
+      "sha256": "b051212ee4b111f861d1848f7dda6b1c922f0fe89b031c0166dff1168aebf474",
+      "size": 10064
     },
     {
       "path": "GitSink.bat",
@@ -39,19 +39,29 @@
       "size": 950
     },
     {
-      "path": "README.md",
-      "sha256": "f7108824c93c361f76d7e2158fac39fb611814682e5f3569ca0fe4044c31d17c",
-      "size": 6388
+      "path": "Nettoyer_Anciens_Fichiers.pyw",
+      "sha256": "376b57622fe4bacc065d308b565a8e557014217894c7a16a4b0baf5a113f5225",
+      "size": 5525
     },
     {
-      "path": "SMARTDUMP_INDEX.txt",
-      "sha256": "782d00eccbe4f21ad54c01b75ccd51762ec663ab3a946c1d7b62806a755afefc",
-      "size": 11157
+      "path": "README.md",
+      "sha256": "c10350d22289dd983dca5c76a70a3ae73ee50ba9c3463b5a326788abc28c21d6",
+      "size": 7845
     },
     {
       "path": "TOOLS.md",
-      "sha256": "46918d12aaed5a9a3b6e3ce165b5e3e4a6a1419132b9e18a745bb683b0b5ac2f",
-      "size": 3399
+      "sha256": "6d4148bae3ee4baac7652278e5a3b9f39d166854b1a6744dfd7d6c17e0d6e5de",
+      "size": 3599
+    },
+    {
+      "path": "VALIDATION_CONSOLIDATION_3_3_1.md",
+      "sha256": "80081f2322c3ddec87acd7f3eea17d18d10eef35c7bf8161160169ed6aaa9860",
+      "size": 1150
+    },
+    {
+      "path": "VALIDATION_DISCOVERY_3_3_0.md",
+      "sha256": "c149f2858d79031bab887b60c248a6ee8ad08b168b41700ea5fad43d59a3698e",
+      "size": 2252
     },
     {
       "path": "VALIDATION_REPORT.md",
@@ -65,8 +75,8 @@
     },
     {
       "path": "VERSION",
-      "sha256": "a2f5f73f64dddd1213983b0af254c74119dd11f643063c4fa5e27fd1eb285840",
-      "size": 11
+      "sha256": "ef2a79c2f7dc37800a73fd9930b307824ce20af920cbc7159323456418e77e6b",
+      "size": 6
     },
     {
       "path": "ZmartZnap.pyw",
@@ -182,6 +192,21 @@
       "path": "docs/22_V10_ALIGNMENT_READINESS.md",
       "sha256": "970fa68b8b2bc47858b553359a187388d2fc56cc973d4d7ec2707ebcf93ea296",
       "size": 3123
+    },
+    {
+      "path": "docs/23_DISCOVERY_AND_READER_PROFILES.md",
+      "sha256": "2699c44d9de4c4023cb0b95dac7ad0003066cbb54c9c5806abf10c2b77ff4d12",
+      "size": 4639
+    },
+    {
+      "path": "docs/24_CONSOLIDATION_CONSUMER_CONTRACTS.md",
+      "sha256": "139b71bbe639eea841324d614bb17a195ab7428f05d986434f872b9b4bbd80dc",
+      "size": 3822
+    },
+    {
+      "path": "docs/25_NETTOYAGE_LOCAL.md",
+      "sha256": "99f85f4c4aa42cfb3f0a8acccc809be67bd19f6004652aa892bc67f4fd70a011",
+      "size": 1409
     },
     {
       "path": "examples/demo-hosted-v10/.gitignore",
@@ -859,9 +884,14 @@
       "size": 328
     },
     {
+      "path": "migration_cleanup_allowlist.json",
+      "sha256": "19e65a09c79086f060ef6640157c4b3bce114cb7db9ea29d25153ec1c598dc50",
+      "size": 576
+    },
+    {
       "path": "schemas/README.md",
-      "sha256": "b8a05ae9e7fbddcdf957345796650d4019676334f717315e66bde635748f2b0c",
-      "size": 1495
+      "sha256": "718234458883263bdc24765747b9f2e8e5f667462481d6b85b0d1dfd064bc04d",
+      "size": 2062
     },
     {
       "path": "schemas/ai-coverage.schema.json",
@@ -884,9 +914,34 @@
       "size": 2481
     },
     {
+      "path": "schemas/kristal-classification.schema.json",
+      "sha256": "4d6db085f7cacfc45351cd7b162a26784d8ce9932ff65ae8c6658e375e1b2e98",
+      "size": 1230
+    },
+    {
+      "path": "schemas/kristal-discovery-audit.schema.json",
+      "sha256": "ee6419de39815a46ec10d8f791b8eb6282f6cfb1adf4c586abcb24808afb4d9c",
+      "size": 1270
+    },
+    {
+      "path": "schemas/kristal-discovery.schema.json",
+      "sha256": "571213011299c30d4cc5a105f947a69765285b6c59ce356a78619b8481bbec7d",
+      "size": 2526
+    },
+    {
       "path": "schemas/kristal-materialization-manifest.schema.json",
       "sha256": "88c1f2981058e9779c60ee7773cfd20b9698d91030b5e5136ea3d605b01ee4fa",
       "size": 5044
+    },
+    {
+      "path": "schemas/kristal-reader-inventory.schema.json",
+      "sha256": "be32f0e9477b1f83681fbae0e7e43f691f92a3d9e44c09fffd3c9f00836e9f9d",
+      "size": 1804
+    },
+    {
+      "path": "schemas/kristal-reader-profile.schema.json",
+      "sha256": "42d995e7f9df057a120380f877542648f63ad5e01d01b965fd447a952301bb83",
+      "size": 2414
     },
     {
       "path": "schemas/kristal-v9-capabilities.schema.json",
@@ -920,8 +975,8 @@
     },
     {
       "path": "schemas/workspace.schema.json",
-      "sha256": "2418f80e43cb93297631a808bcda28b1ad480f0dd1802f6550829d2d8bbdf689",
-      "size": 3794
+      "sha256": "774fa6f4ceadc310adf29dc6a520daca142c81ae574ac321a4cb8f9135dd13e3",
+      "size": 5082
     },
     {
       "path": "scripts/audit_workspace_migration.py",
@@ -935,8 +990,8 @@
     },
     {
       "path": "scripts/check_repo.py",
-      "sha256": "0e7b794cce7bcb475e7637f0bb0db1ca9d6a2b922552c96650c0ca25565763d2",
-      "size": 6879
+      "sha256": "bb2240981cf0623c45123c260c6c6e947a2c4c6482f733003228678b723cefbd",
+      "size": 7006
     },
     {
       "path": "scripts/generate_repo_manifest.py",
@@ -985,8 +1040,23 @@
     },
     {
       "path": "templates/workspace.json",
-      "sha256": "6e048d7ed0086aa47ca6ebd1a3d3798057a5d9861bc2a5b732d04c8b0cc23a2d",
-      "size": 1680
+      "sha256": "68d44e0f267871fb1e3554c33e37693aa59a6972d3c4ee2deb3a6ec41f8224d1",
+      "size": 1704
+    },
+    {
+      "path": "tests/test_cleanup_gui.py",
+      "sha256": "9f1e335b57f12814603dc7093cae37a18111fa15c06c625aaf093068aa0da72f",
+      "size": 2876
+    },
+    {
+      "path": "tests/test_discovery.py",
+      "sha256": "21fc862e8ebd1aced755bab83c29fb0e6d42fc45b7cd405600d96f52d6a55f50",
+      "size": 8743
+    },
+    {
+      "path": "tests/test_discovery_interop.py",
+      "sha256": "453b4be96e9064815c08ce8cb768a4d40a073ed37d9b77e69b4daf9511c1c068",
+      "size": 4621
     },
     {
       "path": "tests/test_tools.py",
@@ -1000,8 +1070,8 @@
     },
     {
       "path": "tools/kristal.py",
-      "sha256": "f93918247749423db0c333b04dd52aacec88eb2b867d238c49c26518dd7e91f0",
-      "size": 133055
+      "sha256": "d021c7355fb74b6f4fd520d42c34d93f62efc7238692d5833970685a58562e97",
+      "size": 159462
     }
   ]
 }

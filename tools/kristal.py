@@ -24,7 +24,7 @@ import tempfile
 import time
 import zipfile
 
-KIT_VERSION = "3.2.5-rc.1"
+KIT_VERSION = "3.3.1"
 FORMAT = "kristal.local-workspace/3.2.0"
 V31_FORMAT = "kristal.authoring-workspace/3.1.0"
 V3_FORMAT = "kristal.authoring-workspace/3.0.0"
@@ -40,6 +40,9 @@ AI_COVERAGE_FORMAT = "kristal.ai-coverage/1.0"
 GITHUB_HOSTING_FORMAT = "kristal.authoring-host/github/1.0"
 LOCAL_INSPECTION_FORMAT = "kristal.local-inspection/1.0"
 GITHUB_READ_SURFACE_FORMAT = "kristal.github-read-surface/1.0"
+DISCOVERY_FORMAT = "kristal.discovery/1.0"
+INVENTORY_FORMAT = "kristal.reader-inventory/1.0"
+READER_FORMAT = "kristal.reader-profile/1.0"
 HOSTED_NETWORK_BASELINE = "kristal.hosting/10.0"
 GITHUB_HOST_PROFILE = "kristal.host/github/1.0"
 SHA40 = re.compile(r"^[0-9a-f]{40}$")
@@ -663,6 +666,435 @@ def _verify_materializations(root: Path, idx: dict) -> tuple[list[tuple[Path, di
     return manifests, errors, warnings
 
 
+# ---------- noncanonical reader discovery and classification ----------
+
+READER_FAMILY = {
+    "diagnosis": "causal-graph", "procedures": "conditional-process", "procedure": "conditional-process",
+    "education": "educational-navigation", "learning": "educational-navigation",
+    "research": "proof-navigation", "mathematics": "proof-navigation",
+    "social": "relational-network", "collections": "comparative-collection",
+    "collection": "comparative-collection", "records": "longitudinal-record",
+    "tracking": "longitudinal-record", "orchestration": "federated-resolution",
+    "reference": "indexed-reference",
+}
+# Fallback on exact Arketype usage IDs; unknown IDs remain valid without claiming
+# a semantic match. Profile labels are advisory, never executable instructions.
+READER_USAGE = {
+    "PRF-06": "federated-resolution", "PRF-07": "educational-navigation",
+    "PRF-08": "comparative-collection", "PRF-09": "relational-network",
+    "PRF-10": "proof-navigation", "PRF-11": "proof-navigation",
+    "PRF-12": "longitudinal-record", "PRF-13": "longitudinal-record",
+    "PRF-14": "longitudinal-record", "PRF-15": "causal-graph",
+    "PRF-16": "conditional-process", "PRF-17": "conditional-process",
+    "PRF-18": "federated-resolution", "PRF-19": "relational-network",
+}
+
+
+def _classification_issues(classification) -> list[str]:
+    if classification is None:
+        return []
+    if not isinstance(classification, dict):
+        return ["classification must be an object"]
+    issues = []
+    def string(name, pattern=None):
+        val = classification.get(name)
+        if val is not None and (not isinstance(val, str) or not val or (pattern and not re.fullmatch(pattern, val))):
+            issues.append(f"classification.{name} invalid")
+    for k in ("arketype_version", "usage_slug", "usage_family", "domain"):
+        string(k)
+    string("primary_archetype", r"ARK-[0-9]{2,}")
+    string("primary_usage", r"PRF-[0-9]{2,}")
+    for k in ("supporting_archetypes", "secondary_usages"):
+        values = classification.get(k, [])
+        pattern = r"ARK-[0-9]{2,}" if k == "supporting_archetypes" else r"PRF-[0-9]{2,}"
+        if not isinstance(values, list) or any(not isinstance(v, str) or not re.fullmatch(pattern, v) for v in values) or len(values) != len(set(values)):
+            issues.append(f"classification.{k} must contain unique known-format IDs")
+    if classification.get("organization", "single") not in {"single", "collection", "federation", "hybrid", "unknown"}:
+        issues.append("classification.organization invalid")
+    return issues
+
+
+def _classification_from_arketype(root: Path, catalog_dir: Path, profile: str) -> dict:
+    cat = read_json(catalog_dir / "catalogue.json")
+    index = read_json(catalog_dir / "inventaires/profils-usage.json")
+    profiles = [p for p in index.get("profiles", []) if p.get("id") == profile or p.get("slug") == profile]
+    if len(profiles) != 1:
+        raise SystemExit(f"Unknown Arketype usage profile: {profile}")
+    row = profiles[0]
+    ids = {a.get("slug"): a.get("id") for a in cat.get("archetypes", [])}
+    primary = ids.get(row.get("primary_archetype"))
+    if not primary:
+        raise SystemExit("Arketype catalogue is missing this profile's primary archetype")
+    return {
+        "arketype_version": cat.get("version"),
+        "primary_archetype": primary,
+        "supporting_archetypes": [ids[k] for k in row.get("supporting_archetypes", []) if k in ids],
+        "primary_usage": row["id"], "usage_slug": row["slug"],
+        "usage_family": row.get("usage_family"), "domain": row.get("domain"),
+        "organization": "single",
+    }
+
+
+def _effective_classification(root: Path, ws: dict) -> dict:
+    declared = ws.get("classification") or {}
+    if declared:
+        return dict(declared)
+    # Arketype 1.4 historically places its identity in a noncanonical sidecar.
+    # It is informative only: no automatic guessing from filenames or content.
+    sidecar = root / "arketype.instance.json"
+    if not sidecar.is_file():
+        return {}
+    try:
+        doc = read_json(sidecar)
+        if doc.get("format") != "arketype.instance-origin/1.0-non-normatif":
+            return {}
+        return {"arketype_version": doc.get("library_version"),
+                "arketype_origin_slug": doc.get("primary_archetype"),
+                "usage_slug": doc.get("use_case_profile"),
+                "classification_source": "arketype.instance.json-unverified"}
+    except (ValueError, OSError, TypeError):
+        return {}
+
+
+def _discovery_documents(root: Path) -> tuple[dict, dict, dict]:
+    """Build lightweight, deterministic observations without reading domain JSON.
+
+    Counts unavailable in local manifests are null, never guessed. This does not
+    scan arbitrary files, follow remote locators, or assert workspace completeness.
+    """
+    root = root.resolve()
+    ws = read_json(root / "kristal.workspace.json")
+    idx = read_json(root / "canon/state.index.json")
+    classification = _effective_classification(root, ws)
+    if _classification_issues(ws.get("classification")):
+        raise ValueError("Invalid workspace classification: " + "; ".join(_classification_issues(ws["classification"])))
+    observed = {}
+    def record(path: Path, kind: str):
+        local = path.resolve()
+        if not local.is_relative_to(root) or not local.is_file():
+            return
+        rel = local.relative_to(root).as_posix()
+        observed[rel] = {"path": rel, "role": kind, "media_type": _media_type(local),
+                         "size_bytes": local.stat().st_size, "sha256": "sha256:" + hash_file(local)}
+    for item in idx.get("canonical_artifacts", []):
+        if isinstance(item, dict) and isinstance(item.get("path"), str):
+            p = _safe_indexed_read_path(root, item["path"])
+            if p:
+                record(p, "canonical_source")
+    descriptors = _discover_materialization_manifests(root)
+    segments = []
+    remote = 0
+    absent = 0
+    for path, doc in descriptors:
+        record(path, "materialization_manifest")
+        profile = doc.get("profile")
+        for seg in doc.get("segments", []):
+            if not isinstance(seg, dict):
+                continue
+            blob = seg.get("blob") or {}
+            if not isinstance(blob, dict):
+                continue
+            local = _safe_local_locator(root, blob.get("locator")) if blob.get("locator") else None
+            status = "unlocated" if not blob.get("locator") else "external" if local is None else "local" if local.is_file() else "missing"
+            if status in ("external", "unlocated"):
+                remote += 1
+            elif status == "missing":
+                absent += 1
+            if status == "local":
+                record(local, "materialization_blob")
+            segments.append({"manifest": path.relative_to(root).as_posix(),
+                             "segment_key": seg.get("segment_key"), "record_count_declared": seg.get("record_count"),
+                             "media_type": blob.get("media_type"), "size_bytes_declared": blob.get("size"),
+                             "digest_declared": blob.get("digest"), "availability": status,
+                             "compression_declared": blob.get("compression"),
+                             "encrypted_declared": bool(blob.get("encryption")),
+                             "path": local.relative_to(root).as_posix() if status == "local" else None,
+                             "materialization_profile": profile})
+        for blob in doc.get("dictionaries", []) or []:
+            if not isinstance(blob, dict):
+                continue
+            local = _safe_local_locator(root, blob.get("locator")) if blob.get("locator") else None
+            if local is not None and local.is_file():
+                record(local, "materialization_dictionary")
+            elif local is None:
+                remote += 1
+            else:
+                absent += 1
+    # Local deterministic build representations are separate physical bytes.
+    build = root / "build/v9"
+    if (build / "state-snapshot.json").is_file():
+        record(build / "state-snapshot.json", "state_candidate")
+        for ap in sorted((build / "artifacts").glob("*.json")):
+            record(ap, "generated_logical_artifact")
+    ordered = [observed[k] for k in sorted(observed, key=lambda v: v.encode("utf-8"))]
+    total = sum(r["size_bytes"] for r in ordered)
+    max_size = max((r["size_bytes"] for r in ordered), default=0)
+    scale = "tiny" if total < 1_000_000 else "small" if total < 50_000_000 else "medium" if total < 1_000_000_000 else "large" if total < 20_000_000_000 else "massive"
+    fingerprints = [[name, hash_file(root / name)] for name in ("kristal.workspace.json", "canon/state.index.json")]
+    sidecar = root / "arketype.instance.json"
+    if sidecar.is_file():
+        fingerprints.append([sidecar.name, hash_file(sidecar)])
+    fingerprint_input = {"inputs": fingerprints, "physical_files": ordered, "segments": segments}
+    fingerprint = "sha256:" + hashlib.sha256(canonicalize(fingerprint_input).encode("utf-8")).hexdigest()
+    inventory = {
+        "format": INVENTORY_FORMAT, "state_ref": ws.get("state_ref"),
+        "source_fingerprint": fingerprint,
+        "size_class": scale,
+        "measurement": {"status": "partial" if remote or absent else "measured_referenced_local_files",
+                        "scope": "registered canonical sources, materialization descriptors/blobs, and built v9 payloads",
+                        "external_or_unlocated_blob_count": remote, "missing_local_blob_count": absent,
+                        "not_measured": ["unregistered workspace files", "external payloads", "JSON nesting depth", "largest JSONL record"]},
+        "storage": {"tracked_local_bytes": total, "tracked_file_count": len(ordered),
+                    "max_tracked_file_bytes": max_size, "materialization_segment_count": len(segments),
+                    "max_json_depth": None, "max_record_bytes": None},
+        "cardinality": {"canonical_artifacts": len(idx.get("canonical_artifacts", [])),
+                        "external_references": len(idx.get("external_references", [])),
+                        "entities": None, "relations": None, "sub_kristals": None},
+        "files": ordered, "segments": segments,
+    }
+    family = classification.get("usage_family") or ""
+    specialization = READER_USAGE.get(classification.get("primary_usage")) or READER_FAMILY.get(family, "generic")
+    organization = classification.get("organization") or "unknown"
+    if organization == "federation":
+        specialization = "federated-resolution"
+    profiles = sorted({x.get("materialization_profile") for x in segments if x.get("materialization_profile")})
+    jsonl = [x for x in segments if x.get("media_type") in ("application/x-ndjson", "application/jsonl", "application/ndjson") or "segmented-jsonl" in str(x.get("materialization_profile"))]
+    # Decisions are scoped to measured local files; a consumer must verify
+    # magic bytes, media type, bounds and permissions, not blindly trust hints.
+    strategies = []
+    local_segments = {x["path"]: x for x in segments if x.get("path")}
+    for item in ordered:
+        linked = local_segments.get(item["path"], {})
+        # A registered manifest's MIME is a declaration, not a substitute for
+        # independent payload verification. Compression/decryption take priority.
+        typ = linked.get("media_type") or item["media_type"]
+        compressed = linked.get("compression_declared")
+        encrypted = linked.get("encrypted_declared", False)
+        if encrypted:
+            mode, engine = "authorized_decryption_required", None
+        elif compressed and compressed not in {"identity", "none"}:
+            mode, engine = "bounded_decompression_required", None
+        elif typ == "application/json":
+            mode = "on_demand_or_dom" if item["size_bytes"] < 32_000_000 else "selective_on_demand_with_capacity_guard"
+            engine = "simdjson"
+        elif typ == "application/x-ndjson":
+            mode, engine = "document_stream_requires_record_bound", "simdjson"
+        else:
+            mode, engine = "format_specific_or_opaque", None
+        strategies.append({"path": item["path"], "media_type_observed": item["media_type"],
+                           "media_type_declared": linked.get("media_type"),
+                           "compression_declared": compressed, "encrypted_declared": encrypted,
+                           "size_bytes_measured": item["size_bytes"],
+                           "suggested_parser_family": engine, "suggested_mode": mode,
+                           "must_verify_digest": item["sha256"],
+                           "authorization_required": True})
+    reader = {
+        "format": READER_FORMAT, "state_ref": ws.get("state_ref"),
+        "source_fingerprint": fingerprint, "specialization": f"kristal.reader/{specialization}-v1",
+        "configuration_status": "advisory_only",
+        "access_pattern": "selective" if specialization != "generic" else "generic",
+        "materialization_profiles": profiles,
+        "artifact_strategies": strategies,
+        "parser_candidates": [
+            {"kind": "jsonl", "engine_family": "simdjson", "mode": "document_stream",
+             "condition": "validated JSONL/NDJSON segments only", "segment_count": len(jsonl)},
+            {"kind": "json", "engine_family": "simdjson", "mode": "on_demand_or_dom",
+             "condition": "JSON files within parser capacity and memory limits"},
+        ],
+        "constraints": ["Verify actual media type, digest, size and local availability before selecting a parser.",
+                        "Enforce memory, decompression and per-record bounds independently of metadata.",
+                        "The reader must authorize all file/network access; this profile grants none.",
+                        "Unrecognized profiles and missing discoveries must fall back to generic guarded parsing."],
+    }
+    discovery = {
+        "format": DISCOVERY_FORMAT, "state_ref": ws.get("state_ref"), "classification": classification,
+        "data_layout": {"state_architecture": (ws.get("target") or {}).get("state_architecture"),
+                        "native_kind": (ws.get("native_model") or {}).get("kind"),
+                        "organization": organization,
+                        "materialization_profiles": profiles,
+                        "inventory_ref": "derived/reader-inventory.json"},
+        "reader": {"profile": reader["specialization"], "hints_ref": "derived/reader-profile.json"},
+        "size": {"class": scale, "tracked_local_bytes": total,
+                 "completeness": inventory["measurement"]["status"]},
+        "source_fingerprint": fingerprint,
+        "authority": "noncanonical_derived_metadata_not_access_or_publication_authority",
+    }
+    return discovery, inventory, reader
+
+
+def _write_discovery(root: Path) -> None:
+    discovery, inventory, reader = _discovery_documents(root)
+    write_json(root / "derived/reader-inventory.json", inventory)
+    write_json(root / "derived/reader-profile.json", reader)
+    write_json(root / "kristal.discovery.json", discovery)
+
+
+def cmd_build_discovery(args):
+    root = Path(args.path).resolve()
+    if not (root / "kristal.workspace.json").is_file():
+        raise SystemExit("No Kristal Local workspace found")
+    _write_discovery(root)
+    print("Built noncanonical discovery and reader inventory for", root)
+
+
+def cmd_classify(args):
+    root = Path(args.path).resolve()
+    ws_path = root / "kristal.workspace.json"
+    ws = read_json(ws_path)
+    c = dict(ws.get("classification") or {})
+    if args.arketype_dir:
+        if not args.usage:
+            raise SystemExit("--arketype-dir requires --usage (PRF ID or slug)")
+        c.update(_classification_from_arketype(root, Path(args.arketype_dir), args.usage))
+    elif args.usage:
+        c["primary_usage" if re.fullmatch(r"PRF-[0-9]{2,}", args.usage) else "usage_slug"] = args.usage
+    for key, value in (("primary_archetype", args.archetype), ("arketype_version", args.arketype_version),
+                       ("usage_family", args.family), ("domain", args.domain), ("organization", args.organization)):
+        if value is not None:
+            c[key] = value
+    problems = _classification_issues(c)
+    if problems:
+        raise SystemExit("Invalid classification: " + "; ".join(problems))
+    ws["classification"] = c
+    write_json(ws_path, ws)
+    _write_discovery(root)
+    print("Saved design classification and refreshed derived reader discovery (no canon changes).")
+
+
+def _check_discovery(root: Path, errors: list[str], warnings: list[str]):
+    paths = [root / p for p in ("kristal.discovery.json", "derived/reader-inventory.json", "derived/reader-profile.json")]
+    present = [x.is_file() for x in paths]
+    if not any(present):
+        # Legacy workspaces remain valid without migration or new required files.
+        return
+    if not all(present):
+        errors.append("Incomplete reader discovery: regenerate with build-discovery")
+        return
+    expected = _discovery_documents(root)
+    for path, wanted in zip(paths, expected):
+        if read_json(path) != wanted:
+            warnings.append(f"Stale or edited derived reader metadata: {path.relative_to(root)}; run build-discovery")
+
+
+
+def audit_reader_discovery(root: Path) -> dict:
+    """Read-only consumer preflight for Manager/Konstellation/Light.
+
+    This is an integrity/freshness check, NOT a grant to read or publish.
+    Summary only: do not leak local file paths or the complete inventory.
+    """
+    root = Path(root).resolve()
+    relatives = (
+        "kristal.discovery.json",
+        "derived/reader-inventory.json",
+        "derived/reader-profile.json",
+    )
+    paths = [root / rel for rel in relatives]
+    result = {
+        "format": "kristal.discovery-audit/1.0",
+        "status": "absent",
+        "usable_as_reader_hint": False,
+        "authorization": "not_evaluated_no_access_or_publication_grant",
+        "issues": [],
+        "formats": [DISCOVERY_FORMAT, INVENTORY_FORMAT, READER_FORMAT],
+    }
+    # No implicit filesystem traversal or network access. Treat symlinks as
+    # unsafe here even if they currently resolve inside the workspace.
+    if any(path.is_symlink() or path.parent.is_symlink() for path in paths):
+        result["status"] = "invalid"
+        result["issues"].append("symlinked_discovery_path")
+        return result
+    present = [p.is_file() for p in paths]
+    if not any(present):
+        return result  # fully legacy Kristals are valid, with generic fallback
+    if not all(present):
+        result["status"] = "incomplete"
+        result["issues"].append("incomplete_discovery_set")
+        return result
+    try:
+        discovery, inventory, profile = [read_json(path) for path in paths]
+        if not all(isinstance(doc, dict) for doc in (discovery, inventory, profile)):
+            raise ValueError("non_object_document")
+        if [discovery.get("format"), inventory.get("format"), profile.get("format")] != result["formats"]:
+            raise ValueError("unknown_contract_format")
+        ws = read_json(root / "kristal.workspace.json")
+        state_ref = ws.get("state_ref")
+        if not state_ref or any(doc.get("state_ref") != state_ref for doc in (discovery, inventory, profile)):
+            raise ValueError("state_ref_mismatch")
+        fingerprint = discovery.get("source_fingerprint")
+        if not isinstance(fingerprint, str) or not re.fullmatch(r"sha256:[0-9a-f]{64}", fingerprint):
+            raise ValueError("invalid_source_fingerprint")
+        if any(doc.get("source_fingerprint") != fingerprint for doc in (inventory, profile)):
+            raise ValueError("source_fingerprint_mismatch")
+        layout, reader, size = discovery.get("data_layout"), discovery.get("reader"), discovery.get("size")
+        if not all(isinstance(x, dict) for x in (layout, reader, size)):
+            raise ValueError("invalid_discovery_structure")
+        if layout.get("inventory_ref") != relatives[1] or reader.get("hints_ref") != relatives[2]:
+            raise ValueError("unexpected_relative_ref")
+        if reader.get("profile") != profile.get("specialization"):
+            raise ValueError("reader_profile_mismatch")
+        if profile.get("configuration_status") != "advisory_only":
+            raise ValueError("reader_hints_not_advisory")
+        if discovery.get("authority") != "noncanonical_derived_metadata_not_access_or_publication_authority":
+            raise ValueError("unexpected_authority")
+        storage, rows = inventory.get("storage"), inventory.get("files")
+        strategies = profile.get("artifact_strategies")
+        if not isinstance(storage, dict) or not isinstance(rows, list) or not isinstance(strategies, list):
+            raise ValueError("invalid_inventory_or_profile")
+        if size.get("tracked_local_bytes") != storage.get("tracked_local_bytes") or size.get("class") != inventory.get("size_class"):
+            raise ValueError("size_summary_mismatch")
+        if len(rows) != storage.get("tracked_file_count"):
+            raise ValueError("file_count_mismatch")
+        listed = {}
+        for row in rows:
+            if not isinstance(row, dict) or not isinstance(row.get("path"), str):
+                raise ValueError("invalid_inventory_row")
+            rel = row["path"]
+            if rel in listed or not rel or rel.startswith("/") or "\\" in rel or any(p in ("", ".", "..") for p in rel.split("/")):
+                raise ValueError("duplicate_or_unsafe_inventory_path")
+            listed[rel] = row
+        if len(strategies) != len(rows):
+            raise ValueError("strategy_count_mismatch")
+        seen = set()
+        for strategy in strategies:
+            if not isinstance(strategy, dict) or strategy.get("path") not in listed:
+                raise ValueError("unlisted_strategy")
+            rel = strategy["path"]
+            if rel in seen:
+                raise ValueError("duplicate_strategy")
+            seen.add(rel)
+            source = listed[rel]
+            if (strategy.get("must_verify_digest") != source.get("sha256")
+                or strategy.get("size_bytes_measured") != source.get("size_bytes")
+                or strategy.get("authorization_required") is not True):
+                raise ValueError("strategy_integrity_mismatch")
+        # Consumer freshness is based on registered inputs and tracked blobs.
+        # It intentionally does not scan the entire project or follow remote refs.
+        expected = _discovery_documents(root)
+        if any(actual != generated for actual, generated in zip((discovery, inventory, profile), expected)):
+            result["status"] = "stale"
+            result["issues"].append("source_inputs_changed_or_metadata_edited")
+            return result
+    except (OSError, ValueError, TypeError, KeyError, json.JSONDecodeError) as exc:
+        result["status"] = "invalid"
+        result["issues"].append("invalid_discovery_or_inputs")
+        # Avoid echoing untrusted file paths/contents in machine output.
+        return result
+    result["status"] = "fresh"
+    result["usable_as_reader_hint"] = True
+    result["tracked_file_count"] = len(rows)
+    result["state_ref"] = state_ref
+    result["reader_profile"] = reader["profile"]
+    return result
+
+
+def cmd_audit_discovery(args):
+    result = audit_reader_discovery(Path(args.path))
+    print(json.dumps(result, ensure_ascii=False, sort_keys=True, indent=None if args.compact else 2))
+    if args.require_fresh and result["status"] != "fresh":
+        raise SystemExit(2)
+
+
 # ---------- workspace creation / migration ----------
 
 def cmd_init(args):
@@ -718,6 +1150,7 @@ def cmd_init(args):
 
     print(f"Initialized Local Kristal workspace: {root}")
     print(f"Profile: {profile}")
+    _write_discovery(root)
     print("Next: fill docs/00..04, register canonical Logical Artifacts, then run build-v9. Portable-AI/Kompiler support is optional: use build-ai or build-v9 --with-ai when needed.")
 
 
@@ -871,6 +1304,11 @@ def cmd_register_artifact(args):
     root = Path(args.path).resolve()
     rel = Path(args.file).as_posix().lstrip("/")
     full = root / rel
+    # Discovery, sidecars, and derived reader hints are never domain canon.
+    if (not full.resolve().is_relative_to(root)
+            or rel in {"kristal.discovery.json", "arketype.instance.json"}
+            or rel.startswith(("derived/", "materializations/", "build/", "state/", "release/", "ai/"))):
+        raise SystemExit("Refusing to register derived/outside-workspace metadata as canonical")
     if not full.is_file():
         raise SystemExit(f"Canonical artifact file does not exist: {rel}")
     idx_path = root / "canon/state.index.json"
@@ -1325,6 +1763,8 @@ def _media_type(path: Path) -> str:
         ".md": "text/markdown",
         ".txt": "text/plain",
         ".json": "application/json",
+        ".jsonl": "application/x-ndjson",
+        ".ndjson": "application/x-ndjson",
         ".csv": "text/csv",
         ".tsv": "text/tab-separated-values",
         ".yaml": "application/yaml",
@@ -1860,6 +2300,9 @@ def _github_read_surface(root: Path) -> dict:
         }
 
     for rel, role in [
+        ("kristal.discovery.json", "reader_discovery"),
+        ("derived/reader-inventory.json", "reader_inventory"),
+        ("derived/reader-profile.json", "reader_profile"),
         ("README.md", "overview"),
         ("AGENTS.md", "ai_instructions"),
         ("AI_START_HERE.md", "ai_entrypoint"),
@@ -1994,6 +2437,7 @@ def collect_json_errors(root: Path):
 def _check_v3(root: Path, ws: dict, idx: dict, errors: list[str], warnings: list[str]):
     if ws.get("format") != FORMAT:
         errors.append(f"Unsupported workspace format: {ws.get('format')!r}")
+    errors.extend(_classification_issues(ws.get("classification")))
     if ws.get("status") not in STATUSES:
         errors.append(f"Unknown lifecycle status: {ws.get('status')!r}")
     if not ws.get("slug"):
@@ -2041,7 +2485,7 @@ def _check_v3(root: Path, ws: dict, idx: dict, errors: list[str], warnings: list
         elif rel in seen_paths: errors.append(f"Duplicate canonical artifact path: {rel}")
         else: seen_paths.add(rel)
         if rel:
-            if any(rel == d or rel.startswith(d + "/") for d in derived_roots):
+            if rel in {"kristal.discovery.json", "arketype.instance.json"} or any(rel == d or rel.startswith(d + "/") for d in derived_roots):
                 errors.append(f"Derived path declared canonical: {rel}")
             if not (root / rel).is_file():
                 errors.append(f"Declared canonical artifact does not exist: {rel}")
@@ -2094,6 +2538,11 @@ def cmd_check(args):
     else:
         _check_v3(root, ws, idx, errors, warnings)
 
+    if not errors:
+        try:
+            _check_discovery(root, errors, warnings)
+        except (ValueError, OSError) as exc:
+            errors.append(f"Invalid reader discovery: {exc}")
     if not errors:
         try:
             manifests, mat_errors, mat_warnings = _verify_materializations(root, idx)
@@ -2240,6 +2689,7 @@ def inspect_local(root: Path) -> dict:
             "segmentation": segmentation,
             "factorization": factorization,
         },
+        "reader_discovery": read_json(root / "kristal.discovery.json") if (root / "kristal.discovery.json").is_file() else None,
         "github_read_surface": _github_read_surface(root),
         "interop": {
             "suggested_collection_root": f"kristals/{slug}",
@@ -2267,6 +2717,11 @@ def cmd_status(args):
     print(f"State ref: {ws.get('state_ref')}")
     print(f"Profile: {ws.get('profile')}")
     print(f"Native model: {ws.get('native_model', {}).get('kind')}")
+    if (root / "kristal.discovery.json").is_file():
+        d = read_json(root / "kristal.discovery.json")
+        print(f"Usage: {(d.get('classification') or {}).get('primary_usage') or (d.get('classification') or {}).get('usage_slug') or 'unspecified'}")
+        print(f"Reader: {(d.get('reader') or {}).get('profile')}")
+        print(f"Measured scale: {(d.get('size') or {}).get('class')} ({(d.get('size') or {}).get('tracked_local_bytes')} tracked local bytes)")
     print(f"Sources: {len(src.get('sources', []))}")
     print(f"Canonical Logical Artifacts: {len(idx.get('canonical_artifacts', []))}")
     print(f"Pinned external references: {len(idx.get('external_references', []))}")
@@ -2407,6 +2862,7 @@ def cmd_build_v9(args):
         "note": "Build receipt is operational metadata and is not part of the state logical commitment.",
     }
     write_json(build / "build-receipt.json", receipt)
+    _write_discovery(root)
     with_ai = bool(getattr(args, "with_ai", False) or (ws.get("portable_ai") or {}).get("enabled", False))
     if with_ai:
         _build_portable_ai(root)
@@ -2554,6 +3010,9 @@ def build_parser():
     p = argparse.ArgumentParser(prog="kristal.py", description="Kristal Local utilities: v9 semantic state + optional AI read layer + optional v10 hosted-network integration")
     sub = p.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("init", help="create a normalized Local Kristal workspace (v9 semantic state; AI and hosting optional)"); s.add_argument("path"); s.add_argument("--slug"); s.add_argument("--title"); s.add_argument("--profile", default="open", choices=sorted(PROFILES)); s.add_argument("--with-ai", action="store_true", help="also seed the optional portable-AI read layer"); s.add_argument("--force", action="store_true"); s.set_defaults(func=cmd_init)
+    s = sub.add_parser("build-discovery", help="regenerate deterministic noncanonical discovery/size/reader metadata"); s.add_argument("path"); s.set_defaults(func=cmd_build_discovery)
+    s = sub.add_parser("audit-discovery", help="read-only non-authoritative consumer preflight for Manager/Konstellation"); s.add_argument("path"); s.add_argument("--compact", action="store_true"); s.add_argument("--require-fresh", action="store_true"); s.set_defaults(func=cmd_audit_discovery)
+    s = sub.add_parser("classify", help="declare Arketype classification (optionally resolve a local Arketype 1.4 catalog)"); s.add_argument("path"); s.add_argument("--arketype-dir"); s.add_argument("--usage"); s.add_argument("--archetype"); s.add_argument("--arketype-version"); s.add_argument("--family"); s.add_argument("--domain"); s.add_argument("--organization", choices=["single", "collection", "federation", "hybrid", "unknown"]); s.set_defaults(func=cmd_classify)
     s = sub.add_parser("migrate-v9", help="compatibility alias: migrate legacy workspace to current v10 Local workspace envelope"); s.add_argument("path"); s.set_defaults(func=cmd_migrate_v9)
     s = sub.add_parser("migrate-v10", help="migrate legacy workspace to Local Kristal v3.2 alignment"); s.add_argument("path"); s.set_defaults(func=cmd_migrate_v10)
     s = sub.add_parser("add-source", help="append a source"); s.add_argument("path"); s.add_argument("--id", required=True); s.add_argument("--title", required=True); s.add_argument("--kind", default="document"); s.add_argument("--locator", required=True); s.add_argument("--version-or-date"); s.add_argument("--sha256"); s.add_argument("--authority-scope"); s.add_argument("--trust-class"); s.add_argument("--notes"); s.set_defaults(func=cmd_add_source)

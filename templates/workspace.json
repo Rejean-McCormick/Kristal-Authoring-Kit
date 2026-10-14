@@ -62,5 +62,6 @@
     "github_required_for_reading": false,
     "languages": [],
     "enabled": false
-  }
+  },
+  "classification": {}
 }

@@ -1,4 +1,4 @@
-# Tools — Kristal Local Kit 3.2.5-rc.1 candidate
+# Tools — Kristal Local Kit 3.3.1
 
 The local CLI relies only on Python's standard library. The GitHub CLI is relevant only to advanced legacy `github-*` operations. It does not provide an authorization or qualification service.
 
@@ -9,6 +9,7 @@ python tools/kristal.py init PATH --title "Title" --slug slug --profile open
 python tools/kristal.py check PATH
 python tools/kristal.py status PATH
 python tools/kristal.py inspect PATH --compact
+python tools/kristal.py audit-discovery PATH --compact
 ```
 
 Legacy envelope migration (only on a **separate copy**, after backup):
@@ -69,3 +70,6 @@ python tools/kristal.py pack PATH --output workspace.zip
 ```
 
 `pack` does not build an AI capsule implicitly; use `pack-ai` for that derived output.
+
+`audit-discovery` is read-only and produces a consumer diagnostic; it never authorizes
+publication, identity merging, nor access to protected local artifacts.

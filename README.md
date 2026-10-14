@@ -1,6 +1,6 @@
 # Kristal Authoring Kit (Local Kit)
 
-**Version:** `3.2.5-rc.1` (compatibility candidate based on 3.2.4) | **Local workspace:** `kristal.local-workspace/3.2.0` | **Semantic state:** `kristal.state/9.0` | **Optional hosting:** `kristal.hosting/10.0` | **Optional AI reader:** `kristal.portable-ai/1.0`
+**Version:** `3.3.1` (optional reader discovery; v9 contracts unchanged) | **Local workspace:** `kristal.local-workspace/3.2.0` | **Semantic state:** `kristal.state/9.0` | **Optional hosting:** `kristal.hosting/10.0` | **Optional AI reader:** `kristal.portable-ai/1.0`
 
 Kristal Authoring Kit creates, structures, checks, and builds portable local Kristals. It owns local authoring and semantic build operations; it does **not** grant public access, synchronize GitHub collections, or activate a hosted release.
 
@@ -30,6 +30,28 @@ python tools/kristal.py build-v9 ./My-Kristal
 ```
 
 By default, `build-v9` builds the v9 semantic layer **without** automatically generating an AI capsule.
+
+## Reader discovery and Arketype classification (3.3.0)
+
+New Kristals expose `kristal.discovery.json`, `derived/reader-inventory.json` and `derived/reader-profile.json`. These provide optional classification, measured sizes of registered files, and advisory reader strategies (including JSON/JSONL and federation). Legacy Kristals without these files remain valid. **They do not modify the v9 canon or authorize file access.**
+
+```bash
+python tools/kristal.py classify ./My-Kristal --arketype-dir ../Arketype-v1.4.0 --usage PRF-15
+python tools/kristal.py build-discovery ./My-Kristal
+python tools/kristal.py check ./My-Kristal
+python tools/kristal.py inspect ./My-Kristal
+```
+
+Consumer preflight (read-only; **not** access authorization):
+
+```bash
+python tools/kristal.py audit-discovery ./My-Kristal --compact
+python tools/kristal.py audit-discovery ./My-Kristal --require-fresh
+```
+
+See [Consumer integration contracts](docs/24_CONSOLIDATION_CONSUMER_CONTRACTS.md) for Manager/Konstellation/Light responsibilities, and [local snapshot cleanup](docs/25_NETTOYAGE_LOCAL.md) for the root `.pyw` tool.
+
+For raw declarations without a local Arketype catalog, use `classify ... --archetype ARK-08 --usage PRF-15 --organization single`. `build-v9` refreshes the reader metadata after compiling the state. Consult [Discovery and reader profiles](docs/23_DISCOVERY_AND_READER_PROFILES.md) for measurement boundaries, freshness, parser and privacy controls.
 
 ## Materializations
 
