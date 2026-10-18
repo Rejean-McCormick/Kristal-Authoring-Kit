@@ -1,4 +1,4 @@
-name: Kristal Local Kit v3.3 CI
+name: Kristal Local Kit v4.0 draft.3 CI
 
 on:
   push:
@@ -31,3 +31,10 @@ jobs:
           python scripts/build_release.py /tmp/a.zip
           python scripts/build_release.py /tmp/b.zip
           cmp /tmp/a.zip /tmp/b.zip
+
+      # Independent v11 schema checks need a pinned Framework checkout supplied
+      # by an approved fixture/release job. Local authoring still runs offline.
+      # The verifier fails closed on changed Framework schema/tool digests.
+
+      - name: diK v11 interop and recovery
+        run: python -m unittest -v tests.test_v11_dik_draft3

@@ -1,12 +1,12 @@
 {
   "format": "kristal.local-kit-repo-manifest/3.2.0",
   "algorithm": "sha256",
-  "kit_version": "3.3.1",
+  "kit_version": "4.0.0-draft.3",
   "files": [
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "7477432caa45ae0301ea46bb0699c74b67418862cfac0a0394027f25b76e1b66",
-      "size": 869
+      "sha256": "cdc983faf210815946b0aa6820bc6a1effdc8bbba95dc941df671c99a006c13a",
+      "size": 1219
     },
     {
       "path": ".gitignore",
@@ -15,13 +15,13 @@
     },
     {
       "path": "AGENTS.md",
-      "sha256": "793d0f071e1905f6ada1e179b1931b084478a3a6d6d867dae1babe86bf4dd01f",
-      "size": 1639
+      "sha256": "282475d4b90f6e63b2a8f4cccc65f160594a989dbccfe80b323d4f774aab5c9b",
+      "size": 3615
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "b051212ee4b111f861d1848f7dda6b1c922f0fe89b031c0166dff1168aebf474",
-      "size": 10064
+      "sha256": "1c2694da6fa0cd4846ca778994cbf1a50c8c9f947f8f4f0cea6d110a5eb37627",
+      "size": 12301
     },
     {
       "path": "GitSink.bat",
@@ -45,13 +45,23 @@
     },
     {
       "path": "README.md",
-      "sha256": "c10350d22289dd983dca5c76a70a3ae73ee50ba9c3463b5a326788abc28c21d6",
-      "size": 7845
+      "sha256": "d227ffc08f4927c47eabfe7773e0e765cc938c07793df83aca6e3172f37cf969",
+      "size": 11599
+    },
+    {
+      "path": "SMARTDUMP_INDEX.txt",
+      "sha256": "782d00eccbe4f21ad54c01b75ccd51762ec663ab3a946c1d7b62806a755afefc",
+      "size": 11157
+    },
+    {
+      "path": "SNAPSHOT_INDEX.txt",
+      "sha256": "af1ac6a3f9cde810f3cc83836420d5273ff58ba94c6c839428ef8f2b2f440095",
+      "size": 12338
     },
     {
       "path": "TOOLS.md",
-      "sha256": "6d4148bae3ee4baac7652278e5a3b9f39d166854b1a6744dfd7d6c17e0d6e5de",
-      "size": 3599
+      "sha256": "8c4cfe67e2742003bbcc6d7f74f5296eb0d82ff56d6df5b13de25445645e6b77",
+      "size": 3965
     },
     {
       "path": "VALIDATION_CONSOLIDATION_3_3_1.md",
@@ -74,14 +84,34 @@
       "size": 2773
     },
     {
+      "path": "VALIDATION_V11_DRAFT1.md",
+      "sha256": "38812261412834ee86adaa9194d8b4d9af7422cc3b4b490a92b0464753fc647a",
+      "size": 2846
+    },
+    {
+      "path": "VALIDATION_V11_DRAFT2.md",
+      "sha256": "e3d06850c6bf86e71c01e9f938664eff60313c43e2d6edc9c6e96524300cf6c6",
+      "size": 2106
+    },
+    {
+      "path": "VALIDATION_V11_DRAFT3.md",
+      "sha256": "24aa5f6ce29702c02a3d54ed7a1cdd238d67660eda41350630a11ff70e48a5ba",
+      "size": 2776
+    },
+    {
       "path": "VERSION",
-      "sha256": "ef2a79c2f7dc37800a73fd9930b307824ce20af920cbc7159323456418e77e6b",
-      "size": 6
+      "sha256": "b5cb9b0d029aae724acb556eb57de218bd2d667305b3aecb7cfef5ea4bd0fbf8",
+      "size": 14
     },
     {
       "path": "ZmartZnap.pyw",
       "sha256": "70775b94ff616ed9efdb3d6b989639fa3cd22a250f1389fec485791d161df1ea",
       "size": 22889
+    },
+    {
+      "path": "contracts/v11-framework-pin.json",
+      "sha256": "074971bb4dd1793e34f14b851f7cd3f56c20db8bf0a97f9339de51e44fb673c2",
+      "size": 1515
     },
     {
       "path": "docs/01_MENTAL_MODEL.md",
@@ -207,6 +237,31 @@
       "path": "docs/25_NETTOYAGE_LOCAL.md",
       "sha256": "99f85f4c4aa42cfb3f0a8acccc809be67bd19f6004652aa892bc67f4fd70a011",
       "size": 1409
+    },
+    {
+      "path": "docs/26_V11_SEMANTIC_AUTHORING.md",
+      "sha256": "c242b72a24ee7027bba470a2bffa18681a1e3e75483f4c822fa76a0da6b06ade",
+      "size": 8235
+    },
+    {
+      "path": "docs/27_DIK_INTEGRATION.md",
+      "sha256": "90c3c334a58d8d2d392837ee1d1fa59c7ad5295bcc0312b0237f4bd1471a83a9",
+      "size": 3752
+    },
+    {
+      "path": "docs/28_V11_FRAMEWORK_QUALIFICATION.md",
+      "sha256": "3dd3020ccd39067302196f0c65b784197472d3584f9f0556a4bec1e9f392fcd2",
+      "size": 3995
+    },
+    {
+      "path": "docs/29_DIK_CATALOG_PROMOTION.md",
+      "sha256": "284d6f299a0ea458207afcf7a68280479f61afd033f5a9f57f0c7bd422697858",
+      "size": 3813
+    },
+    {
+      "path": "docs/30_V11_TRANSACTION_RECOVERY.md",
+      "sha256": "3db21caf7f025e096e8e8ebd9309afc9d551e7a94f9a2eef592bcb669b857970",
+      "size": 2703
     },
     {
       "path": "examples/demo-hosted-v10/.gitignore",
@@ -624,6 +679,211 @@
       "size": 6900
     },
     {
+      "path": "examples/demo-semantic-v11/.gitignore",
+      "sha256": "ba9e766905d86932af10e20f99bdafe6b4a37eab2b45a1d91e011bc12985858f",
+      "size": 99
+    },
+    {
+      "path": "examples/demo-semantic-v11/.kristal/v11/authoring.json",
+      "sha256": "4be7b32014407660b223ff4afe35b36f1f697378828372624556355f32d30a9d",
+      "size": 307
+    },
+    {
+      "path": "examples/demo-semantic-v11/AGENTS.md",
+      "sha256": "bbee46b6de943d0f07f9fad7dc64a4040902295bdcfd27c5840340fe6931a879",
+      "size": 735
+    },
+    {
+      "path": "examples/demo-semantic-v11/README.md",
+      "sha256": "7dc53459ade6ebf367277b49f8a0e2998270515af42cd9ed53234ae188c4d91c",
+      "size": 1078
+    },
+    {
+      "path": "examples/demo-semantic-v11/canon/domain/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "examples/demo-semantic-v11/canon/domain/v11/crosswalk.json",
+      "sha256": "077b7a86286c0c942a8897c1ab8cb182b4bb026d34a5bbe003894dc8fffbd525",
+      "size": 551
+    },
+    {
+      "path": "examples/demo-semantic-v11/canon/domain/v11/dictionaries/catalog.json",
+      "sha256": "873bb7952807871e647e45c8e8a039e70a2b547e600b2e419f62b9a404b8d47e",
+      "size": 627
+    },
+    {
+      "path": "examples/demo-semantic-v11/canon/domain/v11/dictionaries/wikidata-fr.jsonl",
+      "sha256": "eb0725841c628bbc3d2098756cb87ce4d03979cb23d199fce21f4c7a1c3f08f0",
+      "size": 187
+    },
+    {
+      "path": "examples/demo-semantic-v11/canon/domain/v11/graph.json",
+      "sha256": "ad463ff8e4741c69beecad1423a67563c5a1b1b391e507bcdbb0a729bb23d74c",
+      "size": 491
+    },
+    {
+      "path": "examples/demo-semantic-v11/canon/domain/v11/registry.json",
+      "sha256": "292ffc58e0e9650992b23593671fa12c78e5e7d958bdd7daeba723118069a544",
+      "size": 594
+    },
+    {
+      "path": "examples/demo-semantic-v11/canon/epistemic/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "examples/demo-semantic-v11/canon/operations/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "examples/demo-semantic-v11/canon/state.index.json",
+      "sha256": "971c754e5d92da0b955d2ac2ffe19a8a631fdaa93878f757d50524f4c750d4c5",
+      "size": 1533
+    },
+    {
+      "path": "examples/demo-semantic-v11/derived/reader-inventory.json",
+      "sha256": "95ff5f97ddebcb4065450a9e50430e2167d07f23f8a20bb0d53ac50496ac8a1a",
+      "size": 3476
+    },
+    {
+      "path": "examples/demo-semantic-v11/derived/reader-profile.json",
+      "sha256": "13bed581aa46f548f4ce482209b49e5ba1b640c37eefbd157d3374aec26f9a40",
+      "size": 5631
+    },
+    {
+      "path": "examples/demo-semantic-v11/docs/00_INTENT_AND_SCOPE.md",
+      "sha256": "20058d109c733032c42ab9f1d371bcd1644b835e7027bc5a342bf9c40e8831d2",
+      "size": 119
+    },
+    {
+      "path": "examples/demo-semantic-v11/docs/01_SEMANTIC_BOUNDARY.md",
+      "sha256": "b9d677e9f616e5918c69fe6230d2ff7739219537456255af6d1c20bb2695f635",
+      "size": 343
+    },
+    {
+      "path": "examples/demo-semantic-v11/docs/02_NATIVE_MODEL.md",
+      "sha256": "8872b15ac434369419669e5f67292be28ff85d55b721cf977a57a37e887ba69e",
+      "size": 376
+    },
+    {
+      "path": "examples/demo-semantic-v11/docs/03_EPISTEMIC_MODEL.md",
+      "sha256": "fa8c92c4ec074ae734b4f51a2aab119631a7779855d97d023ff71bf750dac9bf",
+      "size": 338
+    },
+    {
+      "path": "examples/demo-semantic-v11/docs/04_CANONICAL_DERIVED.md",
+      "sha256": "cebb7b8881e8008609ba96acd0fba46a4128359587edadf9931f5d0d2e3a4ad6",
+      "size": 326
+    },
+    {
+      "path": "examples/demo-semantic-v11/docs/05_ORIENTATIONS.md",
+      "sha256": "77eecefcd3a4ff43fe81b30a72b6a71afeac499211daa1fbfdfb952bc0ac5bea",
+      "size": 291
+    },
+    {
+      "path": "examples/demo-semantic-v11/docs/06_VALIDATION.md",
+      "sha256": "2930dad2e5e9d8204123466513df81aa8193555da7f83ca1b6c7c8ae71d31ff6",
+      "size": 512
+    },
+    {
+      "path": "examples/demo-semantic-v11/docs/07_HOSTING_AND_PUBLICATION.md",
+      "sha256": "296052938ed668ceebd9204ce3eb38c53525376da6e2a6465e52a431d2916275",
+      "size": 906
+    },
+    {
+      "path": "examples/demo-semantic-v11/docs/08_GLOSSARY.md",
+      "sha256": "cbf9da36411905269f4dda61d209785555573489bcf991665933d7cbdfb5db34",
+      "size": 191
+    },
+    {
+      "path": "examples/demo-semantic-v11/docs/PROFILE_NOTES.md",
+      "sha256": "f66740e1cdbdab66c4ec0320e39416220298663233f90ce60e682298fb8ee067",
+      "size": 172
+    },
+    {
+      "path": "examples/demo-semantic-v11/kristal.discovery.json",
+      "sha256": "0f029ff956aa6ab2ad9ce9529076682bde97c33c7fbac579e4ed4f4aabd6b668",
+      "size": 750
+    },
+    {
+      "path": "examples/demo-semantic-v11/kristal.workspace.json",
+      "sha256": "a9601555d52d842411121a182314fd4782fa3f75b9e842028b4bed5ffc38e8b1",
+      "size": 1699
+    },
+    {
+      "path": "examples/demo-semantic-v11/runtime/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "examples/demo-semantic-v11/sources/source-catalog.json",
+      "sha256": "4e11d46142630914cfd1fb447c6b065d9143d24d179a18edc1162f3063edfce9",
+      "size": 64
+    },
+    {
+      "path": "examples/demo-semantic-v11/state/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "examples/demo-semantic-v11/tools/_templates/AGENTS.kristal.md",
+      "sha256": "bbee46b6de943d0f07f9fad7dc64a4040902295bdcfd27c5840340fe6931a879",
+      "size": 735
+    },
+    {
+      "path": "examples/demo-semantic-v11/tools/_templates/AI_START_HERE.md",
+      "sha256": "bd988bba7c5ed7cd1ad8b69aa62e99d0fa9066ab89b1dc81f7a0c3739e8c1d07",
+      "size": 2595
+    },
+    {
+      "path": "examples/demo-semantic-v11/tools/_templates/github-hosting.json",
+      "sha256": "774e87548a6917b1b25e7c610d727d19af4df081897a816a02744ff5eaf021c9",
+      "size": 378
+    },
+    {
+      "path": "examples/demo-semantic-v11/tools/_templates/gitignore-kristal.txt",
+      "sha256": "ba9e766905d86932af10e20f99bdafe6b4a37eab2b45a1d91e011bc12985858f",
+      "size": 99
+    },
+    {
+      "path": "examples/demo-semantic-v11/tools/_templates/projection.json",
+      "sha256": "9a93c6e5ae26d5d989458a3c7dd43fbe3b5d878a23a6db61d9cc82594d068eb2",
+      "size": 565
+    },
+    {
+      "path": "examples/demo-semantic-v11/tools/_templates/readme-kristal.md",
+      "sha256": "0b1770d06f4bcb86cfac69c1b7c891206a5d282181136c82631819502067cd00",
+      "size": 520
+    },
+    {
+      "path": "examples/demo-semantic-v11/tools/_templates/source-catalog.json",
+      "sha256": "4e11d46142630914cfd1fb447c6b065d9143d24d179a18edc1162f3063edfce9",
+      "size": 64
+    },
+    {
+      "path": "examples/demo-semantic-v11/tools/_templates/state.index.json",
+      "sha256": "28a1ce910aa079e50199b467487fac9af0584ad43360200f5a4666d2481e1c08",
+      "size": 275
+    },
+    {
+      "path": "examples/demo-semantic-v11/tools/_templates/workspace.json",
+      "sha256": "68d44e0f267871fb1e3554c33e37693aa59a6972d3c4ee2deb3a6ec41f8224d1",
+      "size": 1704
+    },
+    {
+      "path": "examples/demo-semantic-v11/tools/kristal.py",
+      "sha256": "efba8f6b346ce358823de665e850ab5672a1769e3acfae8f19ec02fbbb0a32a0",
+      "size": 175676
+    },
+    {
+      "path": "examples/demo-semantic-v11/tools/kristal_v11_core.py",
+      "sha256": "3aa9b2627c63fab2e10bd4385ce790d9330072255558d295c1bf6bab5444dc6d",
+      "size": 31724
+    },
+    {
       "path": "examples/demo-v9-small/.gitignore",
       "sha256": "ba9e766905d86932af10e20f99bdafe6b4a37eab2b45a1d91e011bc12985858f",
       "size": 99
@@ -904,6 +1164,11 @@
       "size": 1186
     },
     {
+      "path": "schemas/authoring-v11-profile.schema.json",
+      "sha256": "7c148264f57305ca6c73830ea20902ea3f324ba889e144d77eef945ed7e78128",
+      "size": 582
+    },
+    {
       "path": "schemas/github-hosting.schema.json",
       "sha256": "31ce2b3056c3cc4fccb314cd2b0df6c24c1cda79b962d5b18f15c1b0cec5fd13",
       "size": 1108
@@ -912,6 +1177,11 @@
       "path": "schemas/github-read-surface.schema.json",
       "sha256": "535c5ecf6c3a67a768b469e9d867bfcd3b48cd97604d06956c87d0e96ff80b69",
       "size": 2481
+    },
+    {
+      "path": "schemas/identity-role-map.schema.json",
+      "sha256": "b9af083794138c95316050d6bbc07f9db7a7522367335f7f54cd0cd2339d810d",
+      "size": 1018
     },
     {
       "path": "schemas/kristal-classification.schema.json",
@@ -990,13 +1260,18 @@
     },
     {
       "path": "scripts/check_repo.py",
-      "sha256": "bb2240981cf0623c45123c260c6c6e947a2c4c6482f733003228678b723cefbd",
-      "size": 7006
+      "sha256": "b8ba130742c0471e7bd407cb7509f8038f83a905d47f4b72224779bae43117a5",
+      "size": 7229
     },
     {
       "path": "scripts/generate_repo_manifest.py",
       "sha256": "6257a616bab684644966e0f14a2059244f846ef5a174ae9f3993bba6191e7d0a",
       "size": 897
+    },
+    {
+      "path": "scripts/qualify_framework_v11.py",
+      "sha256": "8613f932a8aeb2adccb4725d5afa85d82a9e7db29721be7a6d3734b949d47753",
+      "size": 6405
     },
     {
       "path": "templates/AGENTS.kristal.md",
@@ -1069,9 +1344,29 @@
       "size": 8103
     },
     {
+      "path": "tests/test_v11_authoring.py",
+      "sha256": "4cc4022336eee57cf6d79229a4835f7e041f544d191dc119a8fd5335d6857a6d",
+      "size": 11679
+    },
+    {
+      "path": "tests/test_v11_dik_draft3.py",
+      "sha256": "fc9860318da24b04c76a6feb84ce8b11a37f81c7055d095232d23277ba2b15fc",
+      "size": 7994
+    },
+    {
+      "path": "tests/test_v11_qualification.py",
+      "sha256": "ecc845a3f81bfb29d6e78af28248e583f78cc0e5f44a2bc26f61934c540da3c0",
+      "size": 2527
+    },
+    {
       "path": "tools/kristal.py",
-      "sha256": "d021c7355fb74b6f4fd520d42c34d93f62efc7238692d5833970685a58562e97",
-      "size": 159462
+      "sha256": "efba8f6b346ce358823de665e850ab5672a1769e3acfae8f19ec02fbbb0a32a0",
+      "size": 175676
+    },
+    {
+      "path": "tools/kristal_v11_core.py",
+      "sha256": "3aa9b2627c63fab2e10bd4385ce790d9330072255558d295c1bf6bab5444dc6d",
+      "size": 31724
     }
   ]
 }

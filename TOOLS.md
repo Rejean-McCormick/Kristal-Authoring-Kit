@@ -73,3 +73,7 @@ python tools/kristal.py pack PATH --output workspace.zip
 
 `audit-discovery` is read-only and produces a consumer diagnostic; it never authorizes
 publication, identity merging, nor access to protected local artifacts.
+
+## v11 authoring commands (v4 draft.1)
+
+`enable-v11`, `check-v11`, `coverage-v11`, `check-v11-plan`, `apply-v11-plan`, `select-v11-graph`. See [semantic authoring](docs/26_V11_SEMANTIC_AUTHORING.md) for exact examples, scope and limits. All new graph and label checks are strictly opt-in; the historical `check`, `build-v9` and `publish-v9` lifecycle is preserved.

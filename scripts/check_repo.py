@@ -93,6 +93,10 @@ run(sys.executable, '-m', 'unittest', '-v', 'tests.test_discovery', 'tests.test_
 # Validate harmonization regressions without changing shipped workspaces.
 run(sys.executable, '-m', 'unittest', '-v', 'tests.test_v10_alignment')
 
+# Opt-in Framework v11 regression suite (legacy suites remain unchanged).
+run(sys.executable, '-m', 'unittest', '-v', 'tests.test_v11_authoring')
+run(sys.executable, '-m', 'unittest', '-v', 'tests.test_v11_qualification')
+
 # Check shipped examples and rebuild the v9 example in a temp copy.
 run(sys.executable,str(CLI),'check',str(ROOT/'examples/demo-open'))
 run(sys.executable,str(CLI),'check',str(ROOT/'examples/demo-v9-small'))

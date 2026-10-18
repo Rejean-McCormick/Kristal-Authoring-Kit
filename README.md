@@ -1,8 +1,38 @@
 # Kristal Authoring Kit (Local Kit)
 
-**Version:** `3.3.1` (optional reader discovery; v9 contracts unchanged) | **Local workspace:** `kristal.local-workspace/3.2.0` | **Semantic state:** `kristal.state/9.0` | **Optional hosting:** `kristal.hosting/10.0` | **Optional AI reader:** `kristal.portable-ai/1.0`
+**Version:** `4.0.0-draft.3` (opt-in Framework v11 semantic authoring; v9/v10 contracts preserved) | **Local workspace:** `kristal.local-workspace/3.2.0` | **Semantic state:** `kristal.state/9.0` | **Optional hosting:** `kristal.hosting/10.0` | **Optional AI reader:** `kristal.portable-ai/1.0`
 
 Kristal Authoring Kit creates, structures, checks, and builds portable local Kristals. It owns local authoring and semantic build operations; it does **not** grant public access, synchronize GitHub collections, or activate a hosted release.
+
+## New: Framework v11 semantic identity profile (v4 draft.3)
+
+The Kit adds **opt-in** strict KQ/KP/KA/KS semantic graph authoring, namespace and evidence checks, a verified multilingual lexical catalog, and an external KQ↔Wikidata Q / KP↔P crosswalk. Existing Kristals remain under their old profiles unless explicitly enabled.
+
+```bash
+python tools/kristal.py enable-v11 ./My-Kristal --graph canon/domain/v11/graph.json --registry canon/domain/v11/registry.json --crosswalk canon/domain/v11/crosswalk.json --catalog canon/domain/v11/dictionaries/catalog.json
+python tools/kristal.py check-v11 ./My-Kristal
+python tools/kristal.py coverage-v11 ./My-Kristal --locales fr,en,fr-CA
+python tools/kristal.py build-v9 ./My-Kristal
+```
+
+**First register** the four existing JSON files as v9 Logical Artifacts with `register-artifact`; activation fails closed otherwise. Active v11 profiles are checked automatically before `check` and `build-v9`, and canonical words as graph identities are rejected. diK can propose a migration plan; the Kit has read-only plan validation and a limited approved-plan producer that accepts a **v11-shaped** graph only, creates a new artifact, never rewrites the original, and requires an independently reviewed identity-role map. It does not automatically transform arbitrary older models or download dictionaries.
+
+An [opted-in demonstration workspace](examples/demo-semantic-v11/README.md) includes a complete sample KQ/KP graph with deliberately incomplete French translations. `select-v11-graph` can explicitly choose a newly registered graph after conversion while archiving the previous profile.
+
+See [Framework v11 authoring](docs/26_V11_SEMANTIC_AUTHORING.md) and [diK integration](docs/27_DIK_INTEGRATION.md). **v4.0.0-draft.3:** the original Framework `11.0.0-draft.3` release was checked using a pinned schema/tool set. Independent Framework, diK reference coverage and Integration Pack read checks agree on the shipped v11 example. This remains a draft: arbitrary legacy-schema conversion, full power-loss-qualified multi-file transactions and hosted Konstellation integration are not complete. See [Independent v11 qualification](docs/28_V11_FRAMEWORK_QUALIFICATION.md).
+
+### Prior Framework v11 qualification evidence (draft.2; draft.3 recheck required)
+
+The Kit now includes a read-only, **pinned** verifier for its active v11 profile:
+
+```bash
+python tools/kristal.py qualify-v11 ./examples/demo-semantic-v11 \
+  --framework ../kristal-11.0.0-draft.3 \
+  --integration-pack ../Kristal-Integration-Pack-0.2.0-alpha.1 \
+  --locales fr,fr-CA
+```
+
+This requires the full Authoring Kit checkout and the optional `jsonschema` dependency. Ordinary workspace creation/building remains stdlib-only. See [qualification protocol](docs/28_V11_FRAMEWORK_QUALIFICATION.md).
 
 ## Responsibility boundaries
 
@@ -126,3 +156,11 @@ python scripts/audit_workspace_migration.py --before ../Original-Kristal --after
 ```
 
 Results distinguish `PRESERVED`, `BLOCKED`, and `NOT_FULLY_QUALIFIED` (for example when no comparable state snapshots are available). The tool never performs a migration or modifies either workspace. See [V10 alignment](docs/22_V10_ALIGNMENT_READINESS.md) and [English migration guidance](docs/13_MIGRATION_V1_TO_V2.md).
+
+## New in draft.3: explicit diK catalog promotion and recoverable migrations
+
+The Kit can now consume a diK alpha.7-style **Wikidata-only lexical snapshot**, validate its namespace/KQ/KP and imported shard hashes, and create a separate candidate catalog that keeps existing curated labels. Nothing is activated by the import itself. Use `import-dik-catalog --register`, explicitly `select-v11-catalog`, then check coverage and deliberately rebuild v9 semantic state.
+
+`apply-v11-plan` and new catalog registration use a recoverable, journalled two-file protocol. The `recover-v11` command supports status, finish and rollback (rollback permitted only before the registry commit). **No generic conversion of arbitrary legacy JSON, strong human-review authentication or actual power-cut qualification is claimed.**
+
+See [diK exchange](docs/29_DIK_CATALOG_PROMOTION.md) and [recovery](docs/30_V11_TRANSACTION_RECOVERY.md).

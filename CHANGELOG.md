@@ -1,3 +1,30 @@
+## 4.0.0-draft.3 — 2026-10-17
+
+- Added immutable, validated import of diK Wikidata-only catalogs; preserves existing curated/external layers, re-registers as a separate canonical v9 Logical Artifact and requires explicit catalog selection.
+- Replaced simple rollback-on-exception canonical graph registration with a journalled recoverable two-file registration. Added status/finish/rollback CLI and simulated crash regression tests.
+- Clarified Authoring Kit (canonical producer) vs diK (dictionaries and proposals) vs Framework (contracts) responsibilities.
+- Reconciled Framework draft.3 qualification claims with the actual prior reference-test scope.
+- Remains draft: no arbitrary legacy migration, production power-loss qualification or real 300-language industrial benchmark.
+
+## 4.0.0-draft.2 — 2026-10-16
+
+- Qualified the v11 semantic demo against **actual** Framework draft.3 validators and diK coverage reference.
+- Added shared Framework SHA-256 pin identical to Integration Pack v11, plus `qualify-v11` CLI / offline verifier.
+- Added read-only three-way coverage match between Authoring Kit, Framework and Integration Pack; rejects changed pinned schemas.
+- Preserved the historical v9 build files received separately in `authkit.zip`; no canonical history rewritten.
+- Added independent cross-repo qualification tests and validation guidance; no hosted publication or arbitrary legacy migration claim.
+
+# 4.0.0-draft.1 — 2026-10-16
+
+- Added opt-in Framework v11 namespaced KQ/KP/KA/KS authoring profile; historical v9/v10 semantics and workspace formats unchanged.
+- Added explicit registration/validation gate for graph, registry, external Wikidata crosswalk, and language catalog.
+- Added diK-compatible coverage-v11 direct/fallback/missing reports for KQ and KP by locale.
+- Added reviewed plan checks and limited all-approved, digest-bound conversion into a **new complete v11-shaped graph** with v9 Logical Artifact registration; original bytes remain untouched.
+- Introduced safe identity-role manifest, negative regression tests, and v11 integration documentation.
+- Draft caveat: independent byte-level validation against Framework v11 draft.3 schemas remains pending exact source archive availability.
+
+---
+
 # Changelog
 
 ## 3.3.1 — Consumer preflight and local snapshot consolidation

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Kristal Local workspace utilities aligned with Kristal v10.
+"""Kristal Local workspace utilities aligned with Kristal v11 opt-in.
 
 The Local Kit preserves Kristal v9 semantic-state commitments while adding
 explicit v10 hosted-network integration. GitHub/repository metadata is operational
@@ -24,7 +24,7 @@ import tempfile
 import time
 import zipfile
 
-KIT_VERSION = "3.3.1"
+KIT_VERSION = "4.0.0-draft.3"
 FORMAT = "kristal.local-workspace/3.2.0"
 V31_FORMAT = "kristal.authoring-workspace/3.1.0"
 V3_FORMAT = "kristal.authoring-workspace/3.0.0"
@@ -1143,6 +1143,11 @@ def cmd_init(args):
     source_tool = Path(__file__).resolve()
     if source_tool != local_tool.resolve():
         shutil.copy2(source_tool, local_tool)
+    # Companion v11 adapter remains local/offline even when the workspace is
+    # initialized from the installed kit. No semantics are enabled by default.
+    v11_module = source_tool.parent / "kristal_v11_core.py"
+    if v11_module.is_file() and v11_module.resolve() != (root / "tools/kristal_v11_core.py").resolve():
+        shutil.copy2(v11_module, root / "tools/kristal_v11_core.py")
     local_templates = root / "tools" / "_templates"
     local_templates.mkdir(parents=True, exist_ok=True)
     for name in ["workspace.json", "state.index.json", "source-catalog.json", "projection.json", "github-hosting.json", "readme-kristal.md", "AGENTS.kristal.md", "AI_START_HERE.md", "gitignore-kristal.txt"]:
@@ -1255,6 +1260,10 @@ def cmd_migrate_v10(args):
     local_tool = root / "tools/kristal.py"
     if local_tool.exists() and Path(__file__).resolve() != local_tool.resolve():
         shutil.copy2(Path(__file__).resolve(), local_tool)
+    module = Path(__file__).resolve().parent / "kristal_v11_core.py"
+    (root / "tools").mkdir(parents=True, exist_ok=True)
+    if module.is_file() and module.resolve() != (root / "tools/kristal_v11_core.py").resolve():
+        shutil.copy2(module, root / "tools/kristal_v11_core.py")
     local_templates = root / "tools/_templates"
     if local_templates.exists():
         for name in ["workspace.json", "state.index.json", "source-catalog.json", "projection.json", "github-hosting.json", "readme-kristal.md", "AGENTS.kristal.md", "AI_START_HERE.md", "gitignore-kristal.txt"]:
@@ -2600,6 +2609,17 @@ def cmd_check(args):
             except Exception as exc:
                 warnings.append(f"Unable to inspect portable AI layer: {exc}")
 
+    # Opt-in strict semantic graph profile. All historical v9/v10 workspaces
+    # without a v11 profile retain their original validation behavior.
+    profile_path = root / ".kristal/v11/authoring.json"
+    if profile_path.is_file() and not errors:
+        try:
+            import kristal_v11_core as v11
+            verified = v11.validate(root)
+            print(f"OK: Framework v11 identity profile: {verified['graph_id']} ({verified['namespace_id']})")
+        except (ValueError, OSError, ImportError, KeyError, TypeError) as exc:
+            errors.append(f"v11 canonical identity validation failed: {exc}")
+
     for x in warnings: print(f"WARN: {x}")
     for x in errors: print(f"ERROR: {x}")
     if errors: raise SystemExit(1)
@@ -3006,6 +3026,221 @@ def cmd_pack(args):
     print(f"Packed deterministic archive: {output}")
 
 
+# ---------- strict v11 semantic authoring (opt-in) ----------
+
+def _v11_core():
+    import kristal_v11_core as v11
+    return v11
+
+
+def cmd_v11_enable(args):
+    """Activate only after the exact registered canonical inputs already validate."""
+    root = Path(args.path).resolve()
+    v11 = _v11_core()
+    config = {"format": "kristal.authoring-v11-profile/1.0",
+              "semantic_profile": v11.PROFILE,
+              "registry": args.registry, "graph": args.graph,
+              "crosswalk": args.crosswalk, "catalog": args.catalog}
+    profile_file = root / v11.CONFIG
+    if profile_file.exists():
+        raise SystemExit('v11 profile already exists; refusing to overwrite versioned configuration')
+    try:
+        for rel in (args.registry, args.graph, args.crosswalk, args.catalog):
+            v11.safe(root, rel)
+        data = v11.validate(root, config)
+    except (v11.V11Error, ValueError, OSError) as exc:
+        raise SystemExit(f'v11 enable failed; no profile changed: {exc}') from exc
+    profile_file.parent.mkdir(parents=True, exist_ok=True)
+    write_json(profile_file, config)
+    module = Path(__file__).resolve().parent / 'kristal_v11_core.py'
+    if module.is_file() and module.resolve() != (root / 'tools/kristal_v11_core.py').resolve():
+        shutil.copy2(module, root / 'tools/kristal_v11_core.py')
+    print(f"Enabled strict v11 semantics: {data['graph_id']} / {data['namespace_id']}")
+    print('The v9 commitments remain unchanged until a deliberate new build.')
+
+
+def cmd_v11_check(args):
+    root = Path(args.path).resolve();v11 = _v11_core()
+    try:info = v11.validate(root)
+    except (v11.V11Error,ValueError,OSError,KeyError,TypeError) as exc:
+        raise SystemExit(f'v11 check failed: {exc}') from exc
+    print(json.dumps({k:v for k,v in info.items() if k not in ('languages','lexical_terms','files')},ensure_ascii=False,indent=2))
+
+
+def cmd_v11_coverage(args):
+    root = Path(args.path).resolve();v11 = _v11_core()
+    try:
+        report = v11.coverage(root, locales=args.locales.split(',') if args.locales else None)
+        if args.output:
+            output = v11.safe(root, args.output, exists=False)
+            if output.exists():raise v11.V11Error('coverage output exists; do not overwrite a previous report')
+            must_under=(root/'derived').resolve()
+            if not output.is_relative_to(must_under):raise v11.V11Error('coverage output must stay under derived/')
+            output.parent.mkdir(parents=True,exist_ok=True)
+            with output.open('x',encoding='utf8') as f:json.dump(report,f,ensure_ascii=False,indent=2);f.write('\n')
+            print(f'v11 coverage report written: {output}')
+        else:print(json.dumps(report,ensure_ascii=False,indent=2))
+    except (v11.V11Error,ValueError,OSError,KeyError,TypeError) as exc:
+        raise SystemExit(f'v11 coverage failed: {exc}') from exc
+
+
+def _v11_plan_input(root,args):
+    v11=_v11_core();config=v11.load_profile(root)
+    if config is None:raise v11.V11Error('enable-v11 before checking or applying migration plans')
+    data=v11.validate(root)
+    src=v11.safe(root,args.source);plan=v11.read(v11.safe(root,args.plan))
+    registry=v11.read(data['files']['registry'])
+    role_map=None
+    if getattr(args,'roles',None):
+        roles=v11.read(v11.safe(root,args.roles))
+        v11.must(roles.get('format')=='kristal.identity-role-map/11.0' and roles.get('source_sha256')==v11.digest(src), 'identity roles manifest must match source digest')
+        rev=roles.get('review',{})
+        v11.must(all(rev.get(k) for k in ('decision_id','reviewer','reason')),'identity roles manifest lacks explicit reviewer')
+        v11.must(bool(rev.get('evidence_refs')) and all(v11.registry_check(v11.read(data['files']['registry']))[1].get(ref)=='source' for ref in rev['evidence_refs']), 'identity roles manifest needs registered KS evidence')
+        role_map={}
+        for row in roles.get('roles',[]):
+            pointer=row['path'];v11.must(pointer not in role_map and row['role'] in ('entity','property'), 'duplicate/bad identity role')
+            role_map[pointer]=row['role']
+    return v11, data, src, plan, registry, role_map
+
+
+def cmd_v11_select_graph(args):
+    """Explicitly switch the active graph pointer after separate registration/review."""
+    root=Path(args.path).resolve();v11=_v11_core()
+    try:
+        config=v11.load_profile(root)
+        v11._assert_no_pending(root)
+        v11.must(config is not None,'v11 profile not enabled')
+        v11.must(args.graph != config['graph'],'graph is already active')
+        newconfig=dict(config);newconfig['graph']=args.graph
+        data=v11.validate(root,newconfig)
+        profile_path=root/v11.CONFIG
+        old_bytes=profile_path.read_bytes()
+        archive=root/'.kristal/v11/history'
+        archive.mkdir(parents=True,exist_ok=True)
+        old_digest=hashlib.sha256(old_bytes).hexdigest()
+        history_file=archive/f'{old_digest}.json'
+        if not history_file.exists():
+            with history_file.open('xb') as f:f.write(old_bytes)
+        tmp=profile_path.with_name('authoring.json.new')
+        if tmp.exists():raise v11.V11Error('stale temporary profile exists')
+        try:
+            with tmp.open('x',encoding='utf8') as f:json.dump(newconfig,f,ensure_ascii=False,indent=2);f.write('\n')
+            os.replace(tmp,profile_path)
+        finally:
+            tmp.unlink(missing_ok=True)
+        print(f'Selected reviewed v11 graph: {data["graph_id"]}; old profile retained by digest in .kristal/v11/history')
+        print('Run check and build-v9 to create a deliberate new state; publication/activation remain separate.')
+    except (ValueError,KeyError,TypeError,OSError) as exc:
+        raise SystemExit(f'v11 graph selection refused: {exc}') from exc
+
+
+def cmd_v11_plan_check(args):
+    root=Path(args.path).resolve()
+    try:
+        v11,data,src,plan,registry,roles=_v11_plan_input(root,args)
+        result=v11.plan_verify(plan,src,registry,roles,require_approved=False)
+        print(json.dumps({'plan_id':plan['plan_id'],'proposed_operation_count':len(plan['operations']),
+          'source_digest_verified':True,'source_preserved':True,
+          'output_is_executable':False,'target_shape':'not_a_complete_migration_without_v11_graph_validation'},indent=2))
+    except (ValueError,KeyError,TypeError,OSError) as exc:
+        raise SystemExit(f'v11 plan invalid: {exc}') from exc
+
+
+def cmd_v11_apply_plan(args):
+    root=Path(args.path).resolve()
+    try:
+        v11,data,src,plan,registry,roles=_v11_plan_input(root,args)
+        v11.must(roles is not None,'--roles reviewed identity paths are mandatory for canonical migration')
+        new=v11.plan_verify(plan,src,registry,roles)
+        # A generic legacy JSON file cannot become canonical merely because
+        # its words changed. Only a *complete* v11-shaped graph is writable.
+        ns,ids=v11.registry_check(registry)
+        v11.graph_check(new,ns,ids)
+        output=v11.safe(root,args.output,exists=False)
+        canon=(root/'canon/domain').resolve()
+        v11.must(output.is_relative_to(canon) and output.suffix=='.json','new graph must be a fresh canon/domain/*.json path')
+        v11.must(not output.exists(),'migration output already exists')
+        v11.must(output!=src,'cannot overwrite source')
+        idx_path=root/'canon/state.index.json';idx=read_json(idx_path)
+        entries=idx.get('canonical_artifacts',[])
+        rel=output.relative_to(root).as_posix()
+        v11.must(all(x.get('artifact_id')!=args.artifact_id and x.get('path')!=rel for x in entries if isinstance(x,dict)), 'artifact ID/path already registered')
+        v11.must(bool(args.artifact_id) and bool(args.contract_id), 'new artifact identity and contract required')
+        # Double-check the source immediately before writing; never overwrite.
+        v11.must(v11.digest(src)==plan['source']['sha256'],'source changed since validation')
+        v11.register_artifact_recoverably(root,rel=rel,payload=(json.dumps(new,ensure_ascii=False,indent=2)+'\n').encode('utf8'),
+            artifact_id=args.artifact_id,contract_id=args.contract_id)
+        print('Converted graph registered as NEW v11 canonical artifact; source unchanged.')
+        print('Run check and build-v9 deliberately to create new v9 commitments. Publication/activation remain separate.')
+    except (ValueError,KeyError,TypeError,OSError) as exc:
+        raise SystemExit(f'v11 plan application refused: {exc}') from exc
+
+
+def cmd_v11_import_dik(args):
+    root=Path(args.path).resolve();v11=_v11_core()
+    try:
+        result=v11.build_dik_catalog_revision(root,args.catalog,args.revision)
+        # A diK import is not a signed approval; register only a new candidate.
+        if args.register:
+            v11.must(bool(args.artifact_id) and bool(args.contract_id),'--artifact-id and --contract-id required with --register')
+            result['transaction']=v11.register_artifact_recoverably(root,
+                rel=result['catalog'], payload=(root/result['catalog']).read_bytes(),
+                artifact_id=args.artifact_id, contract_id=args.contract_id,allow_existing=True)
+            result['registered']=True
+        print(json.dumps(result,ensure_ascii=False,indent=2))
+    except (v11.V11Error,ValueError,KeyError,TypeError,OSError) as exc:
+        raise SystemExit(f'diK catalog import refused: {exc}') from exc
+
+
+def cmd_v11_select_catalog(args):
+    root=Path(args.path).resolve();v11=_v11_core()
+    try:
+        v11._assert_no_pending(root)
+        config=v11.load_profile(root)
+        v11.must(config is not None,'v11 profile missing')
+        v11.must(args.catalog!=config['catalog'],'catalog already selected')
+        candidate=dict(config,catalog=args.catalog)
+        result=v11.validate(root,candidate)
+        # A single-file os.replace preserves the previous profile on power loss.
+        profile=root/v11.CONFIG;previous=profile.read_bytes()
+        history=root/'.kristal/v11/history';history.mkdir(parents=True,exist_ok=True)
+        backup=history/(hashlib.sha256(previous).hexdigest()+'.json')
+        if not backup.exists():
+            try:v11._write_exclusive_synced(backup,previous)
+            except FileExistsError:pass
+        v11._replace_synced(profile,v11._json_bytes(candidate))
+        print(json.dumps({'selected':args.catalog,'catalog_id':result['catalog_id'],
+            'previous_profile_sha256':hashlib.sha256(previous).hexdigest(),
+            'requires_explicit_build_v9':True},indent=2))
+    except (v11.V11Error,ValueError,KeyError,TypeError,OSError) as exc:
+        raise SystemExit(f'v11 catalog selection refused: {exc}') from exc
+
+
+def cmd_v11_recover(args):
+    v11=_v11_core()
+    try:print(json.dumps(v11.recover_v11(args.path,mode=args.mode),indent=2))
+    except (v11.V11Error,ValueError,KeyError,TypeError,OSError) as exc:
+        raise SystemExit(f'v11 recovery refused: {exc}') from exc
+
+
+def cmd_v11_qualify(args):
+    """Optional offline qualification via the authoritative pinned Framework draft.3.
+
+    Only this qualification operation needs jsonschema; routine local authoring
+    remains Python standard-library-only. Never modifies a workspace.
+    """
+    script=Path(__file__).resolve().parents[1]/'scripts/qualify_framework_v11.py'
+    if not script.is_file():
+        raise SystemExit('qualify-v11 requires the full Authoring Kit checkout, not a copied workspace-only tool')
+    cmd=[sys.executable,str(script),'--project',str(Path(args.path).resolve()),
+         '--framework',str(Path(args.framework).resolve())]
+    if args.integration_pack:cmd+=['--integration-pack',str(Path(args.integration_pack).resolve())]
+    if args.locales:cmd+=['--locales',args.locales]
+    result=subprocess.run(cmd,check=False)
+    if result.returncode:raise SystemExit(result.returncode)
+
+
 def build_parser():
     p = argparse.ArgumentParser(prog="kristal.py", description="Kristal Local utilities: v9 semantic state + optional AI read layer + optional v10 hosted-network integration")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -3039,6 +3274,20 @@ def build_parser():
     s = sub.add_parser("pack-ai", help="create a deterministic self-contained AI-reading capsule without GitHub/tooling dependencies"); s.add_argument("path"); s.add_argument("--output"); s.set_defaults(func=cmd_pack_ai)
     s = sub.add_parser("hash-manifest", help="write deterministic validation/manifest.sha256.json"); s.add_argument("path"); s.set_defaults(func=cmd_hash_manifest)
     s = sub.add_parser("pack", help="create deterministic zip of workspace"); s.add_argument("path"); s.add_argument("--output"); s.set_defaults(func=cmd_pack)
+    s = sub.add_parser("enable-v11", help="opt in to strict v11 identities after registering graph, registry, crosswalk, catalog as v9 logical artifacts"); s.add_argument("path"); s.add_argument("--graph",required=True); s.add_argument("--registry",required=True); s.add_argument("--crosswalk",required=True); s.add_argument("--catalog",required=True); s.set_defaults(func=cmd_v11_enable)
+    s = sub.add_parser("check-v11", help="validate v11 canonical graph, identifiers, crosswalk and lexical catalog"); s.add_argument("path"); s.set_defaults(func=cmd_v11_check)
+    s = sub.add_parser("import-dik-catalog", help="validate diK snapshot, create distinct versioned dictionary catalog, optionally register; never activate automatically")
+    s.add_argument("path");s.add_argument("--catalog",required=True);s.add_argument("--revision",required=True)
+    s.add_argument("--register",action="store_true");s.add_argument("--artifact-id");s.add_argument("--contract-id");s.set_defaults(func=cmd_v11_import_dik)
+    s = sub.add_parser("select-v11-catalog",help="activate independently registered and validated catalog pointer without building a state")
+    s.add_argument("path");s.add_argument("--catalog",required=True);s.set_defaults(func=cmd_v11_select_catalog)
+    s = sub.add_parser("recover-v11",help="inspect, finish or rollback interrupted v11 artifact registrations")
+    s.add_argument("path");s.add_argument("--mode",choices=["status","finish","rollback"],default="status");s.set_defaults(func=cmd_v11_recover)
+    s = sub.add_parser("qualify-v11", help="read-only pinned qualification against actual Framework v11, optionally Integration Pack (requires jsonschema)"); s.add_argument("path"); s.add_argument("--framework",required=True); s.add_argument("--integration-pack"); s.add_argument("--locales"); s.set_defaults(func=cmd_v11_qualify)
+    s = sub.add_parser("coverage-v11", help="diK-compatible direct/fallback/missing lexical coverage (read only)"); s.add_argument("path"); s.add_argument("--locales"); s.add_argument("--output"); s.set_defaults(func=cmd_v11_coverage)
+    s = sub.add_parser("select-v11-graph", help="switch active graph only after validation and v9 registration; retain previous profile history"); s.add_argument("path"); s.add_argument("--graph",required=True); s.set_defaults(func=cmd_v11_select_graph)
+    s = sub.add_parser("check-v11-plan", help="verify a reviewed diK plan without writing"); s.add_argument("path"); s.add_argument("--source",required=True); s.add_argument("--plan",required=True); s.add_argument("--roles"); s.set_defaults(func=cmd_v11_plan_check)
+    s = sub.add_parser("apply-v11-plan", help="write NEW v11-shaped graph from fully approved plan + reviewed identity paths, never overwrite historical canon"); s.add_argument("path"); s.add_argument("--source",required=True); s.add_argument("--plan",required=True); s.add_argument("--roles",required=True); s.add_argument("--output",required=True); s.add_argument("--artifact-id",required=True); s.add_argument("--contract-id",required=True); s.set_defaults(func=cmd_v11_apply_plan)
     return p
 
 
