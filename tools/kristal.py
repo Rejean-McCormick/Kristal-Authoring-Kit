@@ -24,7 +24,7 @@ import tempfile
 import time
 import zipfile
 
-KIT_VERSION = "4.0.0-draft.3"
+KIT_VERSION = "4.0.0-draft.4"
 FORMAT = "kristal.local-workspace/3.2.0"
 V31_FORMAT = "kristal.authoring-workspace/3.1.0"
 V3_FORMAT = "kristal.authoring-workspace/3.0.0"
@@ -3225,7 +3225,7 @@ def cmd_v11_recover(args):
 
 
 def cmd_v11_qualify(args):
-    """Optional offline qualification via the authoritative pinned Framework draft.3.
+    """Optional offline qualification via the authoritative pinned Framework draft.4.
 
     Only this qualification operation needs jsonschema; routine local authoring
     remains Python standard-library-only. Never modifies a workspace.

@@ -9,7 +9,7 @@
 | Authoring Kit v4 | Registered workspace graph checks, v9 Logical Artifact commitments, limited approved-plan conversion to a **new complete v11 graph** |
 | Integration Pack | Read-only adapter/projections, may not inject labels into graph identifiers |
 
-The Authoring Kit **does not become** a Wikidata dictionary manager. diK may prepare its versioned external lexical layers and plans for Kit consumption. The Kit's v11 adapter checks expected structure, namespaces, evidence and layer hashes. In a final release, Framework draft.3 schemas/vectors are now pinned and checked by `qualify-v11`; the shipped semantic example and diK coverage output were compared against the original Framework tools and the v11 Integration Pack. This remains a candidate until full historical and hosted qualification.
+The Authoring Kit **does not become** a Wikidata dictionary manager. diK may prepare its versioned external lexical layers and plans for Kit consumption. The Kit's v11 adapter checks expected structure, namespaces, evidence and layer hashes. In a final release, Framework draft.4 schemas/vectors are now pinned and checked by `qualify-v11`; the shipped semantic example and diK coverage output were compared against the original Framework tools and the v11 Integration Pack. This remains a candidate until full historical and hosted qualification.
 
 ## Safe exchange sequence
 
@@ -22,7 +22,7 @@ The Authoring Kit **does not become** a Wikidata dictionary manager. diK may pre
 
 ## Outstanding work before v4 final
 
-- Requalification must be repeated whenever Framework v11 changes; pin currently locked to draft.3.
+- Requalification must be repeated whenever Framework v11 changes; pin currently locked to draft.4.
 - Historical schema-specific adapters for non-v11-shaped source graphs; do not pretend that a generic JSON plan can preserve arbitrary semantic shape.
 - The new `recover-v11` journal handles interruption between artifact installation and state-index registration. Full operating-system crash/power-loss durability is not yet independently qualified (fsync of parent directories, shared-network filesystems, concurrent legacy writers).
 - diK production tests with 300+ locales and large Wikidata dumps; no network calls implicit.

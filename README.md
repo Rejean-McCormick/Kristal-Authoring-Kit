@@ -1,10 +1,10 @@
 # Kristal Authoring Kit (Local Kit)
 
-**Version:** `4.0.0-draft.3` (opt-in Framework v11 semantic authoring; v9/v10 contracts preserved) | **Local workspace:** `kristal.local-workspace/3.2.0` | **Semantic state:** `kristal.state/9.0` | **Optional hosting:** `kristal.hosting/10.0` | **Optional AI reader:** `kristal.portable-ai/1.0`
+**Version:** `4.0.0-draft.4` (opt-in Framework v11 semantic authoring; v9/v10 contracts preserved) | **Local workspace:** `kristal.local-workspace/3.2.0` | **Semantic state:** `kristal.state/9.0` | **Optional hosting:** `kristal.hosting/10.0` | **Optional AI reader:** `kristal.portable-ai/1.0`
 
 Kristal Authoring Kit creates, structures, checks, and builds portable local Kristals. It owns local authoring and semantic build operations; it does **not** grant public access, synchronize GitHub collections, or activate a hosted release.
 
-## New: Framework v11 semantic identity profile (v4 draft.3)
+## Framework v11 semantic identity profile (v4 draft.4)
 
 The Kit adds **opt-in** strict KQ/KP/KA/KS semantic graph authoring, namespace and evidence checks, a verified multilingual lexical catalog, and an external KQ↔Wikidata Q / KP↔P crosswalk. Existing Kristals remain under their old profiles unless explicitly enabled.
 
@@ -19,16 +19,16 @@ python tools/kristal.py build-v9 ./My-Kristal
 
 An [opted-in demonstration workspace](examples/demo-semantic-v11/README.md) includes a complete sample KQ/KP graph with deliberately incomplete French translations. `select-v11-graph` can explicitly choose a newly registered graph after conversion while archiving the previous profile.
 
-See [Framework v11 authoring](docs/26_V11_SEMANTIC_AUTHORING.md) and [diK integration](docs/27_DIK_INTEGRATION.md). **v4.0.0-draft.3:** the original Framework `11.0.0-draft.3` release was checked using a pinned schema/tool set. Independent Framework, diK reference coverage and Integration Pack read checks agree on the shipped v11 example. This remains a draft: arbitrary legacy-schema conversion, full power-loss-qualified multi-file transactions and hosted Konstellation integration are not complete. See [Independent v11 qualification](docs/28_V11_FRAMEWORK_QUALIFICATION.md).
+See [Framework v11 authoring](docs/26_V11_SEMANTIC_AUTHORING.md) and [diK integration](docs/27_DIK_INTEGRATION.md). **v4.0.0-draft.4:** the complete Framework `11.0.0-draft.4` pin (13 exact SHA-256 files) is shared with Integration Pack `0.3.0-alpha.1`; v11 normative schema/tool files remain identical to draft.3, and the read-only interop preflight is newly pinned. Prior draft.3 qualification remains historical. Independent Framework, diK reference coverage and Integration Pack read checks agree on the shipped v11 example. This remains a draft: arbitrary legacy-schema conversion, full power-loss-qualified multi-file transactions and hosted Konstellation integration are not complete. See [Independent v11 qualification](docs/28_V11_FRAMEWORK_QUALIFICATION.md).
 
-### Prior Framework v11 qualification evidence (draft.2; draft.3 recheck required)
+### Framework v11 qualification (draft.4; prior draft history retained)
 
 The Kit now includes a read-only, **pinned** verifier for its active v11 profile:
 
 ```bash
 python tools/kristal.py qualify-v11 ./examples/demo-semantic-v11 \
-  --framework ../kristal-11.0.0-draft.3 \
-  --integration-pack ../Kristal-Integration-Pack-0.2.0-alpha.1 \
+  --framework ../kristal-11.0.0-draft.4 \
+  --integration-pack ../Kristal-Integration-Pack-0.3.0-alpha.1 \
   --locales fr,fr-CA
 ```
 

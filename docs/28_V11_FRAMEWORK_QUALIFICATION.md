@@ -1,8 +1,8 @@
-# Qualification indépendante du Kit v4.0.0-draft.3 — Framework v11 draft.3
+# Qualification indépendante du Kit v4.0.0-draft.4 — Framework v11 draft.4
 
 **Historique :** les validations précédemment exécutées sur le snapshot draft.2 et ses fixtures de référence restent documentées. Un test de qualification doit être relancé avec les artefacts pinned disponibles avant toute conclusion concernant draft.3.
 
-**Portée :** il s'agit d'une qualification locale en lecture seule utilisant les **schémas et outils réels** de `Kristal Framework 11.0.0-draft.3`, ainsi que, facultativement, l'Integration Pack `0.2.0-alpha.1`. Ce n'est ni une publication GitHub, ni une certification de tous les Kristals historiques.
+**Portée :** il s'agit d'une qualification locale en lecture seule utilisant les **schémas et outils réels** de `Kristal Framework 11.0.0-draft.4`, ainsi que, facultativement, l'Integration Pack `0.3.0-alpha.1`. Ce n'est ni une publication GitHub, ni une certification de tous les Kristals historiques.
 
 ## Contrat partagé et version bloquée
 
@@ -17,8 +17,8 @@ Depuis le dépôt **complet** Authoring Kit (pas une simple copie de `tools/kris
 ```bash
 python -m pip install jsonschema
 python tools/kristal.py qualify-v11 ./examples/demo-semantic-v11 \
-  --framework ../kristal-11.0.0-draft.3 \
-  --integration-pack ../Kristal-Integration-Pack-0.2.0-alpha.1 \
+  --framework ../kristal-11.0.0-draft.4 \
+  --integration-pack ../Kristal-Integration-Pack-0.3.0-alpha.1 \
   --locales fr,fr-CA
 ```
 
@@ -26,7 +26,7 @@ Ou avec un autre projet v11 activé :
 
 ```bash
 python scripts/qualify_framework_v11.py --project ../MonKristal \
-  --framework ../kristal-11.0.0-draft.3
+  --framework ../kristal-11.0.0-draft.4
 ```
 
 ## Vérifications

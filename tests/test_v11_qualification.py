@@ -17,8 +17,9 @@ PACK=os.environ.get('KRISTAL_INTEGRATION_PACK_ROOT')
 class FrameworkQualificationTests(unittest.TestCase):
     def test_pin_structure_and_contracts(self):
         pin=json.loads((ROOT/'contracts/v11-framework-pin.json').read_text())
-        self.assertEqual(pin['version'],'11.0.0-draft.3')
-        self.assertEqual(len(pin['files']),12)
+        self.assertEqual(pin['version'],'11.0.0-draft.4')
+        self.assertEqual(len(pin['files']),13)
+        self.assertIn('tools/v11/interop_preflight.py',pin['files'])
         self.assertIn('schemas/v11/kristal-dictionary-catalog.schema.json',pin['files'])
         self.assertTrue(all(len(x)==64 for x in pin['files'].values()))
 

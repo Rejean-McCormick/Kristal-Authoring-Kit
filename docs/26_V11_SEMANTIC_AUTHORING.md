@@ -1,6 +1,6 @@
-# Framework v11 / diK semantic authoring — Kit v4.0.0-draft.3
+# Framework v11 / diK semantic authoring — Kit v4.0.0-draft.4
 
-**Status: opt-in candidate.** New commands preserve v9 logical-state commitments and v10 hosting. They do **not** rewrite frozen v6–v10 historical artifacts or make every existing Kristal KQ/KP-native. The source snapshot is `Kristal-Authoring-Kit 3.3.1`; the Kit now provides an independent pinned qualifier against the **actual** Framework `11.0.0-draft.3` archive; see [qualification](28_V11_FRAMEWORK_QUALIFICATION.md). This repo intentionally does not invent or reserve KQ/P identifiers from Wikidata.
+**Status: opt-in candidate.** New commands preserve v9 logical-state commitments and v10 hosting. They do **not** rewrite frozen v6–v10 historical artifacts or make every existing Kristal KQ/KP-native. The source snapshot is `Kristal-Authoring-Kit 3.3.1`; the Kit now provides an independent pinned qualifier against the **actual** Framework `11.0.0-draft.4` archive; see [qualification](28_V11_FRAMEWORK_QUALIFICATION.md). This repo intentionally does not invent or reserve KQ/P identifiers from Wikidata.
 
 ## Concepts
 

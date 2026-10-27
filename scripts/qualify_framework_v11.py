@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only qualification of a v11 Authoring workspace against PINNED Framework draft.3.
+"""Read-only qualification of a v11 Authoring workspace against PINNED Framework draft.4.
 
 Optional dependency: jsonschema (also required by the Framework reference tools).
 No downloads; no changes to source, workspace, or published commitments.
@@ -31,7 +31,7 @@ def sha(path):
 def verify_pin(framework):
     # Keep the EXACT shared pin with Integration Pack; no lookups by label.
     spec = json.loads(PIN.read_text(encoding='utf-8'))
-    if spec.get('profile') != 'kristal-integration-framework-pin/v11.0-draft.3':
+    if spec.get('profile') != 'kristal-integration-framework-pin/v11.0-draft.4':
         raise QualificationError('unsupported pin format')
     if not framework.is_dir() or not (framework/'VERSION').is_file():
         raise QualificationError('Framework path missing')
@@ -102,7 +102,7 @@ def qualify(workspace, framework, integration=None, locales=None):
             if command=='check' and (not payload.get('valid') or payload.get('graph_id')!=active['graph_id']):
                 raise QualificationError('Integration Pack rejected graph identity')
         integration_info='coverage-and-check-matched'
-    return {'profile':'kristal.authoring-framework-qualification/11.0-draft.3',
+    return {'profile':'kristal.authoring-framework-qualification/11.0-draft.4',
             'valid':True,'read_only':True,'framework_version':pin['version'],
             'namespace_id':active['namespace_id'],'graph_id':active['graph_id'],
             'graph_sha256':kit.digest(files['graph']),'catalog_sha256':kit.digest(files['catalog']),
