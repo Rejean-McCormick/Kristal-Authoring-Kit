@@ -621,6 +621,50 @@ def _materialization_feature_flags(root: Path, manifests: list[dict]) -> tuple[b
     return segmentation, factorization
 
 
+def _legacy_v9_build_input_materialization(root: Path, rel: str, source: dict) -> bool:
+    """Recognize historical v9 derivation *inputs*, never active State members.
+
+    The archived v9 bundle may include an editorial source materialization
+    whose logical artifact was consumed by a derivation but was intentionally
+    not included in its State Snapshot.  Requiring that source to be a member
+    of the current canonical index would rewrite history.  This exception is
+    confined to the archived v9 folder and requires exact historical binding.
+    """
+    if not rel.startswith(".kristal/v9/materializations/"):
+        return False
+    artifact_id = source.get("artifact_id")
+    contract = source.get("logical_contract")
+    commitment = source.get("logical_commitment")
+    if not artifact_id or not isinstance(contract, dict) or not _valid_commitment(commitment):
+        return False
+    try:
+        derivation = read_json(root / ".kristal/v9/derivation.json")
+        snapshot = read_json(root / ".kristal/v9/state-snapshot.json")
+        inputs = derivation.get("inputs") or []
+        members = snapshot.get("members") or []
+        if not isinstance(inputs, list) or not isinstance(members, list):
+            return False
+        if not any(isinstance(e, dict) and
+                   e.get("artifact_id") == artifact_id and
+                   e.get("logical_contract") == contract and
+                   e.get("logical_commitment") == commitment for e in inputs):
+            return False
+        if any(isinstance(e, dict) and e.get("artifact_id") == artifact_id for e in members):
+            return False
+        # The same archived Logical Artifact must carry the original exact
+        # contract and commitment.  No registry/identity is invented here.
+        candidates = (root / ".kristal/v9/artifacts").glob("*.logical-artifact.json")
+        return any(
+            isinstance((obj := read_json(path)), dict) and
+            obj.get("artifact_id") == artifact_id and
+            obj.get("logical_contract") == contract and
+            obj.get("logical_commitment") == commitment
+            for path in candidates
+        )
+    except (OSError, ValueError, TypeError):
+        return False
+
+
 def _verify_materializations(root: Path, idx: dict) -> tuple[list[tuple[Path, dict]], list[str], list[str]]:
     """Validate manifests, their logical binding, and any locally available blobs."""
     errors: list[str] = []
@@ -640,7 +684,13 @@ def _verify_materializations(root: Path, idx: dict) -> tuple[list[tuple[Path, di
         source = doc.get("source") or {}
         expected = refs.get(source.get("artifact_id"))
         if expected is None:
-            errors.append(f"Materialization {rel} references non-canonical artifact: {source.get('artifact_id')}")
+            if _legacy_v9_build_input_materialization(root, rel, source):
+                warnings.append(
+                    f"Historical v9 derivation input materialization {rel} is noncanonical; "
+                    "not a current State member"
+                )
+            else:
+                errors.append(f"Materialization {rel} references non-canonical artifact: {source.get('artifact_id')}")
         else:
             if source.get("logical_contract") != expected.get("logical_contract"):
                 errors.append(f"Materialization {rel} logical_contract does not match registered artifact {source.get('artifact_id')}")
@@ -711,6 +761,17 @@ def _classification_issues(classification) -> list[str]:
             issues.append(f"classification.{k} must contain unique known-format IDs")
     if classification.get("organization", "single") not in {"single", "collection", "federation", "hybrid", "unknown"}:
         issues.append("classification.organization invalid")
+    mode = classification.get("structure_mode")
+    if mode is not None and mode not in {"archetype", "hybrid", "free"}:
+        issues.append("classification.structure_mode invalid")
+    if mode == "archetype" and not classification.get("primary_archetype"):
+        issues.append("classification.primary_archetype required when structure_mode is archetype")
+    for key in ("variant_description", "declared_structure_notes"):
+        value = classification.get(key)
+        if value is not None and (not isinstance(value, str) or len(value) > 4000):
+            issues.append(f"classification.{key} invalid")
+    if classification.get("structural_profile_version") not in (None, "arketype.structural-profiles/0.1"):
+        issues.append("classification.structural_profile_version invalid")
     return issues
 
 
@@ -952,6 +1013,10 @@ def cmd_classify(args):
                        ("usage_family", args.family), ("domain", args.domain), ("organization", args.organization)):
         if value is not None:
             c[key] = value
+    if args.structure_mode is not None:
+        c["structure_mode"] = args.structure_mode
+    if args.variant_description is not None:
+        c["variant_description"] = args.variant_description
     problems = _classification_issues(c)
     if problems:
         raise SystemExit("Invalid classification: " + "; ".join(problems))
@@ -3247,7 +3312,7 @@ def build_parser():
     s = sub.add_parser("init", help="create a normalized Local Kristal workspace (v9 semantic state; AI and hosting optional)"); s.add_argument("path"); s.add_argument("--slug"); s.add_argument("--title"); s.add_argument("--profile", default="open", choices=sorted(PROFILES)); s.add_argument("--with-ai", action="store_true", help="also seed the optional portable-AI read layer"); s.add_argument("--force", action="store_true"); s.set_defaults(func=cmd_init)
     s = sub.add_parser("build-discovery", help="regenerate deterministic noncanonical discovery/size/reader metadata"); s.add_argument("path"); s.set_defaults(func=cmd_build_discovery)
     s = sub.add_parser("audit-discovery", help="read-only non-authoritative consumer preflight for Manager/Konstellation"); s.add_argument("path"); s.add_argument("--compact", action="store_true"); s.add_argument("--require-fresh", action="store_true"); s.set_defaults(func=cmd_audit_discovery)
-    s = sub.add_parser("classify", help="declare Arketype classification (optionally resolve a local Arketype 1.4 catalog)"); s.add_argument("path"); s.add_argument("--arketype-dir"); s.add_argument("--usage"); s.add_argument("--archetype"); s.add_argument("--arketype-version"); s.add_argument("--family"); s.add_argument("--domain"); s.add_argument("--organization", choices=["single", "collection", "federation", "hybrid", "unknown"]); s.set_defaults(func=cmd_classify)
+    s = sub.add_parser("classify", help="declare Arketype classification (optionally resolve a local Arketype 1.4 catalog)"); s.add_argument("path"); s.add_argument("--arketype-dir"); s.add_argument("--usage"); s.add_argument("--archetype"); s.add_argument("--arketype-version"); s.add_argument("--family"); s.add_argument("--domain"); s.add_argument("--organization", choices=["single", "collection", "federation", "hybrid", "unknown"]); s.add_argument("--structure-mode", choices=["archetype", "hybrid", "free"]); s.add_argument("--variant-description"); s.set_defaults(func=cmd_classify)
     s = sub.add_parser("migrate-v9", help="compatibility alias: migrate legacy workspace to current v10 Local workspace envelope"); s.add_argument("path"); s.set_defaults(func=cmd_migrate_v9)
     s = sub.add_parser("migrate-v10", help="migrate legacy workspace to Local Kristal v3.2 alignment"); s.add_argument("path"); s.set_defaults(func=cmd_migrate_v10)
     s = sub.add_parser("add-source", help="append a source"); s.add_argument("path"); s.add_argument("--id", required=True); s.add_argument("--title", required=True); s.add_argument("--kind", default="document"); s.add_argument("--locator", required=True); s.add_argument("--version-or-date"); s.add_argument("--sha256"); s.add_argument("--authority-scope"); s.add_argument("--trust-class"); s.add_argument("--notes"); s.set_defaults(func=cmd_add_source)
