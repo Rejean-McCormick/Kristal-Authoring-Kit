@@ -1936,7 +1936,12 @@ def _portable_source_files(root: Path):
         if not d.exists():
             continue
         for p in sorted(d.rglob("*"), key=lambda q: q.relative_to(root).as_posix().encode("utf-8")):
-            if p.is_file() and p.name not in {".gitkeep", "desktop.ini"}:
+            # Generated interpreter caches are neither canonical knowledge nor
+            # safe/readable AI publications.  Do not pick them up, even when an
+            # incidental __pycache__ directory lives beneath canon/.
+            if (p.is_file() and p.name not in {".gitkeep", "desktop.ini"}
+                    and not any(part.lower() == "__pycache__" for part in p.relative_to(root).parts)
+                    and p.suffix.lower() not in {".pyc", ".pyo"}):
                 rel = p.relative_to(root).as_posix()
                 if rel not in seen:
                     seen.add(rel)
@@ -2232,6 +2237,12 @@ def _safe_indexed_read_path(root: Path, rel: str) -> Path | None:
     parts = rel.split("/")
     if any(part in {"", ".", ".."} for part in parts):
         return None
+    # Never stage Python bytecode, including accidentally indexed canonical
+    # __pycache__ files.  An old derived AI index must be repaired explicitly
+    # instead of weakening the private/public transport safety check.
+    if (any(part.lower() == "__pycache__" for part in parts)
+            or Path(parts[-1]).suffix.lower() in {".pyc", ".pyo"}):
+        return None
     if rel != "state/state-snapshot.json" and not rel.startswith(_READ_SURFACE_INDEX_PREFIXES):
         return None
     candidate = (root / rel).resolve()
@@ -2343,7 +2354,49 @@ def _github_read_surface(root: Path) -> dict:
     ws_path = root / "kristal.workspace.json"
     ws = read_json(ws_path) if ws_path.is_file() else {}
     slug = str(ws.get("slug") or slugify(root.name))
-    errors = _check_portable_ai(root) if (root / "AI_MANIFEST.json").is_file() else ["Portable AI read layer is missing; run build-ai first"]
+    portable = ws.get("portable_ai") if isinstance(ws.get("portable_ai"), dict) else {}
+    # A private, *limited* reading profile is distinct from a portable-AI
+    # capsule. Never claim AI readiness without its complete, verified manifest.
+    limited = portable.get("enabled") is False and not (root / "AI_MANIFEST.json").exists()
+    format_id = "kristal.github-private-read-surface/1.0" if limited else GITHUB_READ_SURFACE_FORMAT
+    entrypoint = "README.md" if limited else "AI_START_HERE.md"
+    errors = [] if limited else (_check_portable_ai(root) if (root / "AI_MANIFEST.json").is_file() else ["Portable AI read layer is missing; run build-ai first"])
+    state_snapshot_rel = None
+    state_snapshot = None
+    if limited:
+        primary = ("state/state-snapshot.json", "build/v9/state-snapshot.json")
+        # Native .kristal/v9 states can be historical; only consider them if
+        # neither of the declared portable/build surfaces exists. Never
+        # conflate a preserved legacy state with a contemporary descriptor.
+        native_fallback = (".kristal/v9/states/current.state-snapshot.json", ".kristal/v9/state-snapshot.json")
+        candidates = primary if any((root / rel).is_file() for rel in primary) else native_fallback
+        matches = []
+        for rel in candidates:
+            # Explicit state descriptor allowlist, independent of the narrow
+            # *AI-index* allowlist.  Never let a generic AI index select build/.
+            path = (root / rel)
+            if path.is_symlink() or not path.resolve().is_relative_to(root) or not path.is_file():
+                continue
+            try:
+                if path.stat().st_size > 16 * 1024 * 1024:
+                    raise ValueError("V9 snapshot exceeds private read-surface metadata limit")
+                data = read_json(path)
+                if data.get("artifact_type") != "kristal_state_snapshot" or data.get("schema_version") != "9.0":
+                    raise ValueError("Unsupported V9 state descriptor")
+                if data.get("state_ref") != ws.get("state_ref"):
+                    raise ValueError("V9 state_ref differs from workspace")
+                if data.get("logical_commitment") != state_commitment(data):
+                    raise ValueError("V9 logical commitment verification failed")
+                matches.append((rel, data))
+            except Exception as exc:
+                errors.append(f"Invalid V9 snapshot {rel}: {type(exc).__name__}: {exc}")
+        # No guessing between contradictory contemporary state snapshots.
+        if not matches:
+            errors.append("No verified V9 state snapshot available for private reading")
+        elif len({canonicalize(data["logical_commitment"]) for _, data in matches}) != 1:
+            errors.append("Conflicting V9 logical commitments; private transfer blocked")
+        else:
+            state_snapshot_rel, state_snapshot = matches[0]
     files: dict[str, dict] = {}
 
     def add_file(rel: str, role: str, *, media_type: str | None = None, sha256: str | None = None, size: int | None = None, trusted: bool = False):
@@ -2388,14 +2441,21 @@ def _github_read_surface(root: Path) -> dict:
         ("ai/RELATIONS.json", "ai_relations"),
         ("ai/QUESTIONS.md", "ai_navigation"),
     ]:
+        if limited and (rel.startswith("ai/") or rel.startswith("AI_")):
+            continue
         add_file(rel, role, trusted=True)
+    if limited:
+        if not (root / "README.md").is_file():
+            errors.append("README.md is required as private limited-reading entrypoint")
+        if state_snapshot_rel:
+            add_file(state_snapshot_rel, "state_snapshot", trusted=True)
 
     manifest = None
     index = None
     try:
         if (root / "AI_MANIFEST.json").is_file():
             manifest = read_json(root / "AI_MANIFEST.json")
-        if (root / "ai/INDEX.json").is_file():
+        if not limited and (root / "ai/INDEX.json").is_file():
             index = read_json(root / "ai/INDEX.json")
             for item in index.get("files", []):
                 if not isinstance(item, dict) or not isinstance(item.get("path"), str):
@@ -2413,24 +2473,24 @@ def _github_read_surface(root: Path) -> dict:
 
     ordered = [files[k] for k in sorted(files, key=lambda x: x.encode("utf-8"))]
     materialization_objects = list((index or {}).get("materialization_blobs") or [])
-    state_ref = (manifest or {}).get("state_ref")
-    commitment = (manifest or {}).get("state_logical_commitment")
+    state_ref = state_snapshot["state_ref"] if limited and state_snapshot else (manifest or {}).get("state_ref")
+    commitment = state_snapshot["logical_commitment"] if limited and state_snapshot else (manifest or {}).get("state_logical_commitment")
     projection = {
-        "format": GITHUB_READ_SURFACE_FORMAT,
+        "format": format_id,
         "slug": slug,
         "state_ref": state_ref,
         "state_logical_commitment": commitment,
-        "entrypoint": "AI_START_HERE.md",
+        "entrypoint": entrypoint,
         "files": [{"path": x["path"], "role": x["role"], "size": x["size"], "sha256": x["sha256"]} for x in ordered],
         "materialization_objects": materialization_objects,
     }
     surface_digest = "sha256:" + hashlib.sha256(canonicalize(projection).encode("utf-8")).hexdigest()
     return {
-        "format": GITHUB_READ_SURFACE_FORMAT,
+        "format": format_id,
         "kit_version": KIT_VERSION,
         "slug": slug,
         "target_root": f"kristals/{slug}",
-        "entrypoint": "AI_START_HERE.md",
+        "entrypoint": entrypoint,
         "state_ref": state_ref,
         "state_logical_commitment": commitment,
         "ready": not errors,
@@ -2441,7 +2501,8 @@ def _github_read_surface(root: Path) -> dict:
         "files": ordered,
         "materialization_object_count": len(materialization_objects),
         "materialization_objects": materialization_objects,
-        "note": "Derived GitHub/AI read projection. Materialization bytes are separate host-transport candidates; neither surface nor transport is a semantic commitment or publication.",
+        "note": ("Private LIMITED read-only projection, NOT a portable AI capsule and NOT public publication authority."
+                 if limited else "Derived GitHub/AI read projection. Materialization bytes are separate host-transport candidates; neither surface nor transport is a semantic commitment or publication."),
     }
 
 
