@@ -1921,6 +1921,28 @@ def _materialization_read_inventory(root: Path) -> dict:
         "unlocated_blob_count": unlocated,
     }
 
+# The hosted/portable read projection must not collect opaque working databases,
+# private keys or local tooling secrets merely because they live below sources/.
+# They remain untouched in the authored workspace; only the derived AI index
+# and read-surface omit them. The public stager retains its independent guards.
+_PORTABLE_READ_EXCLUDED_NAMES = frozenset({
+    ".env", "id_rsa", "id_ed25519", "credentials.json", "secrets.json",
+})
+_PORTABLE_READ_EXCLUDED_SUFFIXES = (
+    ".pem", ".key", ".p12", ".pfx", ".sqlite", ".sqlite3", ".db",
+)
+_PORTABLE_READ_EXCLUDED_DIRS = frozenset({
+    ".git", ".ssh", "node_modules", "__pycache__", ".venv",
+})
+
+
+def _excluded_from_portable_read(rel: str) -> bool:
+    parts = rel.lower().split("/")
+    return (any(part in _PORTABLE_READ_EXCLUDED_DIRS for part in parts[:-1])
+            or parts[-1] in _PORTABLE_READ_EXCLUDED_NAMES
+            or parts[-1].endswith(_PORTABLE_READ_EXCLUDED_SUFFIXES))
+
+
 def _portable_source_files(root: Path):
     """Files that help an offline/GitHub AI understand the Kristal.
 
@@ -1943,12 +1965,16 @@ def _portable_source_files(root: Path):
                     and not any(part.lower() == "__pycache__" for part in p.relative_to(root).parts)
                     and p.suffix.lower() not in {".pyc", ".pyo"}):
                 rel = p.relative_to(root).as_posix()
+                if _excluded_from_portable_read(rel):
+                    continue
                 if rel not in seen:
                     seen.add(rel)
                     yield p
     inv = _materialization_read_inventory(root)
     for p, _doc in inv["manifests"]:
         rel = p.relative_to(root).as_posix()
+        if _excluded_from_portable_read(rel):
+            continue
         if rel not in seen:
             seen.add(rel)
             yield p
@@ -2241,7 +2267,8 @@ def _safe_indexed_read_path(root: Path, rel: str) -> Path | None:
     # __pycache__ files.  An old derived AI index must be repaired explicitly
     # instead of weakening the private/public transport safety check.
     if (any(part.lower() == "__pycache__" for part in parts)
-            or Path(parts[-1]).suffix.lower() in {".pyc", ".pyo"}):
+            or Path(parts[-1]).suffix.lower() in {".pyc", ".pyo"}
+            or _excluded_from_portable_read(rel)):
         return None
     if rel != "state/state-snapshot.json" and not rel.startswith(_READ_SURFACE_INDEX_PREFIXES):
         return None
