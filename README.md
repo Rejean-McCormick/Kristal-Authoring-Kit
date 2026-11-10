@@ -164,3 +164,7 @@ The Kit can now consume a diK alpha.7-style **Wikidata-only lexical snapshot**, 
 `apply-v11-plan` and new catalog registration use a recoverable, journalled two-file protocol. The `recover-v11` command supports status, finish and rollback (rollback permitted only before the registry commit). **No generic conversion of arbitrary legacy JSON, strong human-review authentication or actual power-cut qualification is claimed.**
 
 See [diK exchange](docs/29_DIK_CATALOG_PROMOTION.md) and [recovery](docs/30_V11_TRANSACTION_RECOVERY.md).
+
+## Branch 02 final-system alignment (2026-11-09)
+
+See [the English functional handoff and qualification limits](docs/31_BRANCH02_FINAL_SYSTEM_HANDOFF.md). This is an additive, owner-scoped alignment; no canonical state, public release or production deployment is implied.
