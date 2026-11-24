@@ -1,3 +1,13 @@
+# Changelog
+
+## 4.0.0-draft.4 — state documented from 2026-11-23 source snapshot
+
+- Updated the **opt-in Framework v11 `11.0.0-draft.4` exact pin** (13 SHA-256-identified files), coordinated with the Integration Pack `0.3.0-alpha.1` source snapshot.
+- Kept v11 normative schema/tool material identical to draft.3 where documented; included the newly pinned **read-only interop preflight**.
+- Preserved v9/v10 contracts, the split of semantic authority, the independent qualification requirement and the prior draft.3 evidence as **historical**.
+- This entry is a **source/documentation reconciliation**, **not** a new full TCK, production certification, completion of arbitrary legacy migration, power-loss qualification or hosted Konstellation integration.
+- See [Framework v11 qualification and its limits](docs/28_V11_FRAMEWORK_QUALIFICATION.md) and [repository README](README.md).
+
 ## 4.0.0-draft.3 — 2026-10-17
 
 - Added immutable, validated import of diK Wikidata-only catalogs; preserves existing curated/external layers, re-registers as a separate canonical v9 Logical Artifact and requires explicit catalog selection.
