@@ -77,8 +77,9 @@ class ToolTests(unittest.TestCase):
         self.assertEqual(obj["interop"]["suggested_collection_root"], "kristals/demo")
         self.assertEqual(obj["interop"]["suggested_collection_state_path"], "kristals/demo/state/state-snapshot.json")
         self.assertEqual(obj["interop"]["suggested_channel_suffix"], "demo/stable")
-        self.assertEqual(obj["github_read_surface"]["format"], "kristal.github-read-surface/1.0")
-        self.assertFalse(obj["github_read_surface"]["ready"])
+        self.assertEqual(obj["github_read_surface"]["format"], "kristal.github-private-read-surface/1.0")
+        self.assertTrue(obj["github_read_surface"]["ready"])
+        self.assertEqual(obj["github_read_surface"]["entrypoint"], "README.md")
         self.assertEqual(before, (self.ws / "canon/state.index.json").read_bytes())
 
     def test_inspect_prefers_explicit_state_export(self):
