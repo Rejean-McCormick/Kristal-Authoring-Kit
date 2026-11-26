@@ -1,0 +1,3 @@
+# V5.21 — Native V6 migration candidates
+
+Manager constructs offline candidate V11 registry, graph, empty external crosswalk and lexical catalog from exact pinned V6 native references. A separate bridge pins originals and all JSON pointers. Kit and pinned Framework validation and coverage reports must agree. Synthetic staging state index and authoring profile are NOT a real registered workspace or an approval to activate. Keep historical native artifacts and epistemic metadata. Do not use these candidates as canonical or public until editorial approval and a recoverable state-registration/activation procedure qualify the new state. See Manager `docs/SEMANTIC_NATIVE_MIGRATION_V521.md`.
