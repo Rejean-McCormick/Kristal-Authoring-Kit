@@ -1,0 +1,5 @@
+# Native registration rehearsal V5.21.2
+
+Manager builds private candidates and exact registration plans. Authoring Kit remains the only canonical graph producer/registrar. V5.21.2 calls the existing `register_artifact_recoverably` function in temporary isolated state-index copies, then qualifies the selected temporary profile against the pinned Framework. Existing canonical artifact contents are not revalidated by this rehearsal. The original states, source IDs, evidence registries, assertion roles/statuses and pointer bridges stay private and unchanged. The candidate profile is not a release and cannot be activated by this overlay.
+
+A production activation requires separate independent editorial approval, an approved identity-role migration plan, reader access to the original epistemic data, a verified live workspace and transaction recovery strategy. A declared reviewer name and hash-bound approval are not authentication. Do not run any production registration merely because a rehearsal succeeded. See `docs/30_V11_TRANSACTION_RECOVERY.md`.

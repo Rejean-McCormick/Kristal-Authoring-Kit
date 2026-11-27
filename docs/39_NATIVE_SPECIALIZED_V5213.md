@@ -1,0 +1,3 @@
+# Specialized scalar occurrence projections
+
+Candidates only. The existing V11 graph schema accepts scalar literals and entity references, including qualifiers, but not arbitrary JSON or arrays. Do not stringify structured objects or decompose them into unapproved relations. Keep source bytes and occurrence pointers; preserve native assertion status, record role, evidence and provenance outside the graph. Propositions retain their exact textual value and original native kind in the archived source. Rehearsed registrations are not authorization. Independent editorial qualification and a production epistemic reader contract remain mandatory.

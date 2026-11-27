@@ -1,0 +1,2 @@
+# V5.21.1 candidate extension
+Manager builds nine additional provisional candidate graphs from pinned native V6 sources; Kit and pinned Framework validate them. A synthetic staging registration is not a real workspace registration. Approval templates remain pending. No activation, publication or external identity acceptance. Review original epistemic fields through the exact pointer bridge before future registration.

@@ -1,0 +1,3 @@
+# Native structured packets V5.21.4
+
+The additive builder `tools/structured_native_v5214.py` copies exact pinned originals into private `structured/<slug>/originals/`, constructs a typed occurrence index, and invokes the experimental Framework validator. It does not call registration or profile activation. The exact prior source files and state index are checked before and after the run. No publication or canonical writes. Scope: ten native assertion corpora, three registered artifact inventories. The latter are discovery only; no assertion extraction is claimed. The current V11 contract and pin remain unchanged. Any future graph migration requires reviewed native-to-graph rules and a production reader contract.
