@@ -1,6 +1,7 @@
 """diK interoperability and failure-atomic v11 registration (draft.3)."""
 import hashlib
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -46,6 +47,45 @@ class Interop(unittest.TestCase):
         self.assertTrue((self.project/'.kristal/v11/history').is_dir())
         self.assertNotEqual(self.cli('import-dik-catalog',self.project,'--catalog',self.input,
                           '--revision','new-wikidata',ok=False).returncode,0)
+
+    @unittest.skipUnless(os.environ.get('BRANCH02_DIK_ROOT'), 'Select a local diK checkout to exercise its actual CLI')
+    def test_actual_dik_producer_import_and_select(self):
+        # This is a disposable functional exchange, not the historical alpha.7 pin audit.
+        dik = Path(os.environ['BRANCH02_DIK_ROOT']).resolve()
+        src = dik / 'src'
+        sample = dik / 'examples/demo/wikidata-small.sample.jsonl'
+        self.assertTrue((src/'dik/__main__.py').is_file(), 'diK source checkout missing')
+        self.assertTrue(sample.is_file(), 'diK sample dump missing')
+        python = os.environ.get('BRANCH02_DIK_PYTHON')
+        if not python:
+            candidate = dik / ('.venv/Scripts/python.exe' if os.name == 'nt' else '.venv/bin/python')
+            python = str(candidate) if candidate.is_file() else sys.executable
+        original = {n: (self.canon/n).read_bytes() for n in ('graph.json', 'registry.json', 'crosswalk.json')}
+        namespace = json.loads(original['registry.json'])['namespace_id']
+        incoming = Path(self.tmp.name) / 'incoming'
+        env = os.environ.copy()
+        env['PYTHONPATH'] = str(src)
+        env['PYTHONUTF8'] = '1'
+        proc = subprocess.run([python, '-m', 'dik', 'wikidata', 'import-local',
+            '--dump', str(sample), '--crosswalk', str(self.canon/'crosswalk.json'),
+            '--registry', str(self.canon/'registry.json'), '--namespace', namespace,
+            '--snapshot', 'actual-dik', '--locales', 'fr,en', '--output', str(incoming)],
+            cwd=dik, env=env, text=True, encoding='utf-8', capture_output=True, timeout=90)
+        self.assertEqual(proc.returncode, 0, proc.stdout+'\n'+proc.stderr)
+        catalog = json.loads(proc.stdout)
+        self.assertEqual(Path(catalog['catalog']), incoming/'catalog.json')
+        self.assertEqual(catalog['labels_by_locale'], {'fr': 1, 'en': 1})
+        imported = json.loads(self.cli('import-dik-catalog', self.project,
+            '--catalog', incoming/'catalog.json', '--revision', 'actual-dik',
+            '--register', '--artifact-id', 'urn:diK:actual-interop', '--contract-id', 'test.dik').stdout)
+        self.assertTrue(imported['registered'])
+        self.assertFalse(imported['selected'])
+        self.cli('select-v11-catalog', self.project, '--catalog', imported['catalog'])
+        checked = json.loads(self.cli('check-v11', self.project).stdout)
+        self.assertEqual(checked['catalog_id'], imported['catalog_id'])
+        self.assertEqual(v11.load_profile(self.project)['catalog'], imported['catalog'])
+        for name, content in original.items():
+            self.assertEqual((self.canon/name).read_bytes(), content)
 
     def test_reject_unapproved_wikidata_label(self):
         import_dir=Path(self.tmp.name)/'foreign';shutil.copytree(self.input.parent,import_dir)
